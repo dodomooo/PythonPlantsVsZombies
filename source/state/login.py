@@ -203,16 +203,17 @@ class LoginScreen(tool.State):
         tool.renderInputBox(surface, self.id_input_rect, self.employee_id_text,
                            self.active_input == 'employee_id', 24)
 
-        # 绘制登录按钮
-        pg.draw.rect(surface, c.TEAL, self.login_button_rect)
+        # 绘制登录按钮 - 使用金黄色与标题呼应
+        pg.draw.rect(surface, c.GOLD, self.login_button_rect)
         pg.draw.rect(surface, c.WHITE, self.login_button_rect, 2)
         button_text = label_font.render(LANG.get('login_button'), True, c.BLACK)
         button_text_rect = button_text.get_rect()
         button_text_rect.center = self.login_button_rect.center
         surface.blit(button_text, button_text_rect)
 
-        # 绘制语言切换按钮
-        pg.draw.rect(surface, c.LIGHT_BLUE, self.language_button_rect)
+        # 绘制语言切换按钮 - 使用与背景协调的浅金色
+        lang_button_color = (120, 100, 150)  # 淡紫色，与深蓝背景协调
+        pg.draw.rect(surface, lang_button_color, self.language_button_rect)
         pg.draw.rect(surface, c.WHITE, self.language_button_rect, 2)
         lang_text = label_font.render(LANG.get('login_language'), True, c.WHITE)
         lang_text_rect = lang_text.get_rect()

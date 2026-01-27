@@ -99,32 +99,65 @@ class LoadingScreen(tool.State):
         # 填充黑色背景
         surface.fill(c.BLACK)
 
-        # 获取当前故事文本
+        # 获取当前故事文本（中英双语）
         if self.current_story_index < len(self.stories):
-            story_text = self.stories[self.current_story_index]
+            # 保存当前语言
+            original_lang = LANG.get_current_language()
+
+            # 获取中文文本
+            LANG.set_language(c.LANGUAGE_ZH_CN)
+            zh_text = LANG.get(f'loading_story_{self.current_story_index + 1}')
+
+            # 获取英文文本
+            LANG.set_language(c.LANGUAGE_EN_US)
+            en_text = LANG.get(f'loading_story_{self.current_story_index + 1}')
+
+            # 恢复原语言
+            LANG.set_language(original_lang)
 
             # 文本自动换行处理
-            font = pg.font.SysFont('SimHei', 28)  # 使用中文字体
+            zh_font = pg.font.SysFont('SimHei', 24)  # 中文字体稍大
+            en_font = pg.font.SysFont('Arial', 18)   # 英文字体稍小
             max_width = c.SCREEN_WIDTH - 100  # 左右各留50像素边距
 
             # 将文本分割成多行
-            lines = self.wrap_text(story_text, font, max_width)
+            zh_lines = self.wrap_text(zh_text, zh_font, max_width)
+            en_lines = self.wrap_text(en_text, en_font, max_width)
 
             # 计算总高度
-            line_height = font.get_linesize()
-            total_height = line_height * len(lines)
+            zh_line_height = zh_font.get_linesize()
+            en_line_height = en_font.get_linesize()
+            spacing = 10  # 中英文之间的间距
+            total_height = (zh_line_height * len(zh_lines) +
+                          spacing +
+                          en_line_height * len(en_lines))
 
             # 起始Y坐标（居中）
             start_y = (c.SCREEN_HEIGHT - total_height) // 2
 
-            # 逐行绘制文字
-            for i, line in enumerate(lines):
-                text_surface = font.render(line, True, c.WHITE)
+            # 绘制中文文字
+            y_offset = start_y
+            for i, line in enumerate(zh_lines):
+                text_surface = zh_font.render(line, True, c.WHITE)
                 text_surface.set_alpha(self.alpha)
                 text_rect = text_surface.get_rect()
                 text_rect.centerx = c.SCREEN_WIDTH // 2
-                text_rect.y = start_y + i * line_height
+                text_rect.y = y_offset
                 surface.blit(text_surface, text_rect)
+                y_offset += zh_line_height
+
+            # 添加间距
+            y_offset += spacing
+
+            # 绘制英文文字（灰色）
+            for i, line in enumerate(en_lines):
+                text_surface = en_font.render(line, True, (180, 180, 180))
+                text_surface.set_alpha(self.alpha)
+                text_rect = text_surface.get_rect()
+                text_rect.centerx = c.SCREEN_WIDTH // 2
+                text_rect.y = y_offset
+                surface.blit(text_surface, text_rect)
+                y_offset += en_line_height
 
             # 绘制进度指示器（小点点）
             dot_y = c.SCREEN_HEIGHT - 50

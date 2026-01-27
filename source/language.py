@@ -49,10 +49,13 @@ class LanguageManager:
 
             # Game Report
             'report_title': '游戏报告',
+            'report_score_card': '游戏成绩',
             'report_final_score': '最终分数：',
             'report_rank': '排名：',
             'report_duration': '游戏时长：',
             'report_kills_title': '击杀统计',
+            'report_total_kills': '总击杀: {}',
+            'report_count_unit': '{}个',
             'report_leaderboard': '排行榜',
             'report_export': '导出截图',
             'report_play_again': '再来一局',
@@ -107,10 +110,13 @@ class LanguageManager:
 
             # Game Report
             'report_title': 'Game Report',
+            'report_score_card': 'Game Score',
             'report_final_score': 'Final Score: ',
             'report_rank': 'Rank: ',
             'report_duration': 'Duration: ',
             'report_kills_title': 'Kill Statistics',
+            'report_total_kills': 'Total Kills: {}',
+            'report_count_unit': '{}',
             'report_leaderboard': 'Leaderboard',
             'report_export': 'Export Screenshot',
             'report_play_again': 'Play Again',

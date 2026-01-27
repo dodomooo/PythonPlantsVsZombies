@@ -20,10 +20,10 @@ class GameReportScreen(tool.State):
         self.leaderboard = []
         self.is_offline = False
 
-        # 按钮位置
-        self.export_button_rect = pg.Rect(100, 520, 150, 40)
-        self.play_again_button_rect = pg.Rect(325, 520, 150, 40)
-        self.exit_button_rect = pg.Rect(550, 520, 150, 40)
+        # 按钮位置 - 调整宽度以适应英文文本
+        self.export_button_rect = pg.Rect(50, 520, 200, 40)
+        self.play_again_button_rect = pg.Rect(300, 520, 200, 40)
+        self.exit_button_rect = pg.Rect(550, 520, 200, 40)
 
         # 截图导出反馈
         self.export_message = ''
@@ -120,7 +120,7 @@ class GameReportScreen(tool.State):
 
         # 左侧：成绩卡片
         score_card_rect = pg.Rect(30, 100, 360, 180)
-        self.draw_card(surface, score_card_rect, '游戏成绩')
+        self.draw_card(surface, score_card_rect, LANG.get('report_score_card'))
 
         # 绘制最终分数
         score_font = pg.font.SysFont('SimHei', 36, bold=True)
@@ -152,10 +152,11 @@ class GameReportScreen(tool.State):
 
         # 右侧：击杀统计卡片
         kills_card_rect = pg.Rect(410, 100, 360, 180)
+        kills_card_right_edge = kills_card_rect.x + kills_card_rect.width - 10  # 右边界留10像素边距
         self.draw_card(surface, kills_card_rect, LANG.get('report_kills_title'))
 
         # 绘制各类僵尸击杀统计
-        kill_font = pg.font.SysFont('SimHei', 18)
+        kill_font = pg.font.SysFont('SimHei', 16)  # 缩小字体避免溢出
         y_offset = 140
         zombie_name_map = {
             c.NORMAL_ZOMBIE: 'zombie_normal',
@@ -166,26 +167,36 @@ class GameReportScreen(tool.State):
         }
 
         total_kills = sum(self.zombies_killed.values())
-        total_label = pg.font.SysFont('SimHei', 20, bold=True).render(f"总击杀: {total_kills}", True, c.GOLD)
+        total_label = pg.font.SysFont('SimHei', 18, bold=True).render(
+            LANG.get('report_total_kills').format(total_kills), True, c.GOLD)
         surface.blit(total_label, (430, 140))
 
-        y_offset = 170
+        y_offset = 165
         for zombie_type, count in self.zombies_killed.items():
             if count > 0:
                 zombie_name = LANG.get(zombie_name_map.get(zombie_type, zombie_type))
                 score_value = c.ZOMBIE_SCORES.get(zombie_type, 0)
 
-                # 绘制僵尸名称和数量
-                name_text = kill_font.render(f"{zombie_name}:", True, c.LIGHTYELLOW)
+                # 绘制僵尸名称 - 如果太长则截断
+                name_text_content = f"{zombie_name}:"
+                name_text = kill_font.render(name_text_content, True, c.LIGHTYELLOW)
+                if name_text.get_width() > 120:  # 名称最多占120像素
+                    # 缩短僵尸名称
+                    truncated_name = zombie_name[:8] + "..." if len(zombie_name) > 8 else zombie_name
+                    name_text = kill_font.render(f"{truncated_name}:", True, c.LIGHTYELLOW)
                 surface.blit(name_text, (430, y_offset))
 
-                count_text = kill_font.render(f"{count}个", True, c.WHITE)
-                surface.blit(count_text, (580, y_offset))
+                # 绘制数量
+                count_text = kill_font.render(LANG.get('report_count_unit').format(count), True, c.WHITE)
+                surface.blit(count_text, (560, y_offset))
 
-                score_text = kill_font.render(f"(+{count * score_value})", True, c.GREEN)
-                surface.blit(score_text, (650, y_offset))
+                # 绘制得分 - 确保不超出右边界
+                score_text_content = f"(+{count * score_value})"
+                score_text = kill_font.render(score_text_content, True, c.GREEN)
+                score_x = min(620, kills_card_right_edge - score_text.get_width())
+                surface.blit(score_text, (score_x, y_offset))
 
-                y_offset += 25
+                y_offset += 23
 
         # 底部：排行榜卡片（如果在线）
         if not self.is_offline and self.leaderboard:
@@ -201,7 +212,14 @@ class GameReportScreen(tool.State):
 
             for i, entry in enumerate(self.leaderboard[:10], 1):
                 name = entry.get('name', 'Unknown')
+                employee_id = entry.get('employee_id', '')
                 score = entry.get('score', 0)
+
+                # 组合显示姓名和工号
+                if employee_id:
+                    display_name = f"{name}({employee_id})"
+                else:
+                    display_name = name
 
                 # 前3名使用特殊颜色
                 if i == 1:
@@ -213,7 +231,7 @@ class GameReportScreen(tool.State):
                 else:
                     color = c.WHITE
 
-                rank_text = leaderboard_font.render(f"{i}. {name}: {score}", True, color)
+                rank_text = leaderboard_font.render(f"{i}. {display_name}: {score}", True, color)
 
                 # 前5名在左列，后5名在右列
                 if i <= 5:
@@ -298,8 +316,16 @@ class GameReportScreen(tool.State):
         pg.draw.rect(surface, bg_color, rect, border_radius=8)
         pg.draw.rect(surface, c.WHITE, rect, 2, border_radius=8)
 
-        # 绘制文字
+        # 绘制文字 - 自适应字体大小
         button_text = font.render(text, True, text_color)
+        text_width = button_text.get_rect().width
+
+        # 如果文字太宽，缩小字体
+        if text_width > rect.width - 20:  # 留出10像素边距
+            scale_factor = (rect.width - 20) / text_width
+            smaller_font = pg.font.SysFont('SimHei', int(font.get_height() * scale_factor))
+            button_text = smaller_font.render(text, True, text_color)
+
         button_text_rect = button_text.get_rect()
         button_text_rect.center = rect.center
         surface.blit(button_text, button_text_rect)
