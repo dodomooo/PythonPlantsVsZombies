@@ -1,6 +1,9 @@
 __author__ = 'marble_xu'
 
 import os
+# 在导入 pygame 之前设置 SDL 环境变量，启用 Windows 原生 IME 候选框
+os.environ["SDL_IME_SHOW_UI"] = "1"
+
 import json
 from abc import abstractmethod
 import pygame as pg
@@ -179,7 +182,7 @@ def renderText(text, font_size, color, bg_color=None):
         text_surface = font.render(text, True, color)
     return text_surface
 
-def renderInputBox(surface, rect, text, active, font_size=24):
+def renderInputBox(surface, rect, text, active, font_size=24, composing_text=''):
     """渲染输入框
     Args:
         surface: 渲染目标 Surface
@@ -187,6 +190,7 @@ def renderInputBox(surface, rect, text, active, font_size=24):
         text: 输入框文本
         active: 是否激活（激活时边框高亮）
         font_size: 字体大小
+        composing_text: IME 正在编辑的文本（拼音）
     """
     box_rect = pg.Rect(rect)
     # 绘制边框
@@ -196,10 +200,22 @@ def renderInputBox(surface, rect, text, active, font_size=24):
     bg_rect = pg.Rect(rect[0] + 2, rect[1] + 2, rect[2] - 4, rect[3] - 4)
     pg.draw.rect(surface, c.BLACK, bg_rect)
     # 渲染文字
+    font = pg.font.SysFont('SimHei', font_size)
+    text_x = rect[0] + 10
+    text_y = rect[1] + (rect[3] - font_size) // 2
+
     if text:
-        font = pg.font.SysFont('SimHei', font_size)  # 使用中文字体
         text_surface = font.render(text, True, c.WHITE)
-        surface.blit(text_surface, (rect[0] + 10, rect[1] + (rect[3] - text_surface.get_height()) // 2))
+        surface.blit(text_surface, (text_x, text_y))
+        text_x += text_surface.get_width()
+
+    # 渲染正在编辑的文本（拼音），用不同颜色显示
+    if composing_text:
+        composing_surface = font.render(composing_text, True, c.GOLD)
+        # 绘制下划线背景表示正在编辑
+        underline_rect = pg.Rect(text_x, text_y + font_size - 2, composing_surface.get_width(), 2)
+        pg.draw.rect(surface, c.GOLD, underline_rect)
+        surface.blit(composing_surface, (text_x, text_y))
 
 def fadeInText(surface, text, alpha, pos, font_size=30, color=c.WHITE):
     """渲染渐入文字效果

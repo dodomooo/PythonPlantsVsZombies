@@ -38,6 +38,24 @@ class LoginScreen(tool.State):
         self.error_message = ''
         self.is_offline = False
         self.connecting = False
+        # 启用 IME 文本输入支持（用于中文输入）
+        pg.key.start_text_input()
+        self.update_text_input_rect()
+
+    def cleanup(self):
+        # 离开登录页面时停止 IME 文本输入
+        pg.key.stop_text_input()
+        self.done = False
+        return self.persist
+
+    def update_text_input_rect(self):
+        """更新 IME 候选框显示位置"""
+        if self.active_input == 'name':
+            rect = self.name_input_rect
+        else:
+            rect = self.id_input_rect
+        # 设置 IME 候选框显示在输入框下方
+        pg.key.set_text_input_rect(pg.Rect(rect[0], rect[1] + rect[3], rect[2], rect[3]))
 
     def update(self, surface, current_time, mouse_pos, mouse_click, events):
         self.current_time = current_time
@@ -63,6 +81,7 @@ class LoginScreen(tool.State):
                 if event.key == pg.K_TAB:
                     # Tab键切换输入框
                     self.active_input = 'employee_id' if self.active_input == 'name' else 'name'
+                    self.update_text_input_rect()
                 elif event.key == pg.K_RETURN:
                     # 回车键登录
                     self.do_login()
@@ -72,13 +91,12 @@ class LoginScreen(tool.State):
                         self.name_text = self.name_text[:-1]
                     else:
                         self.employee_id_text = self.employee_id_text[:-1]
+            elif event.type == pg.TEXTINPUT:
+                # 使用 TEXTINPUT 事件处理文本输入（支持中文 IME）
+                if self.active_input == 'name':
+                    self.name_text += event.text
                 else:
-                    # 添加字符（支持中文和其他 Unicode 字符）
-                    if event.unicode and len(event.unicode) > 0:
-                        if self.active_input == 'name':
-                            self.name_text += event.unicode
-                        else:
-                            self.employee_id_text += event.unicode
+                    self.employee_id_text += event.text
 
     def handle_mouse_click(self, mouse_pos):
         """处理鼠标点击"""
@@ -86,11 +104,13 @@ class LoginScreen(tool.State):
         name_rect = pg.Rect(self.name_input_rect)
         if name_rect.collidepoint(mouse_pos):
             self.active_input = 'name'
+            self.update_text_input_rect()
 
         # 点击工号输入框
         id_rect = pg.Rect(self.id_input_rect)
         if id_rect.collidepoint(mouse_pos):
             self.active_input = 'employee_id'
+            self.update_text_input_rect()
 
         # 点击登录按钮
         if self.login_button_rect.collidepoint(mouse_pos):
