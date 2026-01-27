@@ -197,7 +197,7 @@ def renderInputBox(surface, rect, text, active, font_size=24):
     pg.draw.rect(surface, c.BLACK, bg_rect)
     # 渲染文字
     if text:
-        font = pg.font.SysFont('Arial', font_size)
+        font = pg.font.SysFont('SimHei', font_size)  # 使用中文字体
         text_surface = font.render(text, True, c.WHITE)
         surface.blit(text_surface, (rect[0] + 10, rect[1] + (rect[3] - text_surface.get_height()) // 2))
 

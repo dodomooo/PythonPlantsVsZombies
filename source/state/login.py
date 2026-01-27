@@ -73,8 +73,8 @@ class LoginScreen(tool.State):
                     else:
                         self.employee_id_text = self.employee_id_text[:-1]
                 else:
-                    # 添加字符
-                    if event.unicode.isprintable():
+                    # 添加字符（支持中文和其他 Unicode 字符）
+                    if event.unicode and len(event.unicode) > 0:
                         if self.active_input == 'name':
                             self.name_text += event.unicode
                         else:

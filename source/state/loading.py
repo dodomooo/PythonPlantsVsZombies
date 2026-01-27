@@ -63,6 +63,37 @@ class LoadingScreen(tool.State):
         # 绘制页面
         self.draw(surface)
 
+    def wrap_text(self, text, font, max_width):
+        """
+        将文本按照最大宽度自动换行
+        Args:
+            text: 要换行的文本
+            font: 字体对象
+            max_width: 最大宽度（像素）
+        Returns:
+            list: 分割后的文本行列表
+        """
+        words = list(text)  # 将文本拆分为字符列表（支持中文）
+        lines = []
+        current_line = ''
+
+        for char in words:
+            test_line = current_line + char
+            # 检查当前行宽度
+            if font.size(test_line)[0] <= max_width:
+                current_line = test_line
+            else:
+                # 当前行已满，保存并开始新行
+                if current_line:
+                    lines.append(current_line)
+                current_line = char
+
+        # 添加最后一行
+        if current_line:
+            lines.append(current_line)
+
+        return lines
+
     def draw(self, surface):
         """绘制 Loading 页面"""
         # 填充黑色背景

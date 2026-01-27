@@ -624,6 +624,12 @@ class Level(tool.State):
                 self.done = True
                 return
 
+            # 疯狂模式下只检查失败条件，不检查胜利条件
+            if self.checkLose():
+                self.next = c.GAME_LOSE
+                self.done = True
+            return
+
         # 普通模式：检查胜利和失败
         if self.checkVictory():
             self.game_info[c.LEVEL_NUM] += 1

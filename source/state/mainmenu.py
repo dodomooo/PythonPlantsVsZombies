@@ -47,6 +47,9 @@ class Menu(tool.State):
            y >= self.option_rect.y and y <= self.option_rect.bottom):
             self.option_clicked = True
             self.option_timer = self.option_start = self.current_time
+            # 设置疯狂模式标志，使用特殊关卡名
+            self.game_info['is_crazy_mode'] = True
+            self.game_info[c.LEVEL_NUM] = 'crazy'
         return False
         
     def update(self, surface, current_time, mouse_pos, mouse_click, events):
