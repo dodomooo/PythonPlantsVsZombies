@@ -1,0 +1,225 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', 'SimHei', Arial, sans-serif;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    min-height: 100vh;
+    color: #fff;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    padding: 30px 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 2rem;
+    color: #ffd700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 10px;
+}
+
+.refresh-info {
+    font-size: 0.9rem;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.refresh-info #countdown {
+    color: #4CAF50;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+#refresh-btn {
+    padding: 8px 20px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#refresh-btn:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+#refresh-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+#refresh-btn:disabled {
+    background: #888;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+main {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.loading, .error, .empty {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #ffd700;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error p {
+    color: #ff6b6b;
+    margin-bottom: 20px;
+}
+
+.error button {
+    padding: 10px 30px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.error button:hover {
+    background: #45a049;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+th, td {
+    padding: 15px 10px;
+    text-align: center;
+}
+
+th {
+    color: #ffd700;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.2s;
+}
+
+tbody tr:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* 前三名特殊样式 */
+.rank-1 {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.3) 0%, transparent 100%);
+}
+
+.rank-1 td:first-child {
+    color: #ffd700;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.rank-2 {
+    background: linear-gradient(90deg, rgba(192, 192, 192, 0.3) 0%, transparent 100%);
+}
+
+.rank-2 td:first-child {
+    color: #c0c0c0;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.rank-3 {
+    background: linear-gradient(90deg, rgba(205, 127, 50, 0.3) 0%, transparent 100%);
+}
+
+.rank-3 td:first-child {
+    color: #cd7f32;
+    font-weight: bold;
+    font-size: 1.05rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    header {
+        padding: 20px 15px;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    th, td {
+        padding: 10px 5px;
+        font-size: 0.85rem;
+    }
+
+    /* 在小屏幕上隐藏工号列 */
+    th:nth-child(3), td:nth-child(3) {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.2rem;
+    }
+
+    th, td {
+        padding: 8px 3px;
+        font-size: 0.75rem;
+    }
+
+    /* 在更小屏幕上隐藏时间列 */
+    th:nth-child(6), td:nth-child(6) {
+        display: none;
+    }
+}

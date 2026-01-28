@@ -1,7 +1,6 @@
 __author__ = 'marble_xu'
 
 import pygame as pg
-from datetime import datetime
 from .. import tool
 from .. import constants as c
 from ..language import LANG
@@ -9,26 +8,18 @@ from ..network import NETWORK
 
 
 class GameReportScreen(tool.State):
-    """游戏报告页面，显示最终分数、排名和击杀统计"""
+    """游戏报告页面，显示最终分数和击杀统计"""
 
     def __init__(self):
         tool.State.__init__(self)
         self.score = 0
-        self.rank = None
         self.game_duration = 0
         self.zombies_killed = {}
-        self.leaderboard = []
         self.is_offline = False
 
-        # 按钮位置 - 调整宽度以适应英文文本
-        self.export_button_rect = pg.Rect(50, 520, 200, 40)
-        self.play_again_button_rect = pg.Rect(300, 520, 200, 40)
-        self.exit_button_rect = pg.Rect(550, 520, 200, 40)
-
-        # 截图导出反馈
-        self.export_message = ''
-        self.export_message_time = 0
-        self.export_message_duration = 3000  # 显示3秒
+        # 按钮位置 - 只保留两个按钮
+        self.play_again_button_rect = pg.Rect(200, 330, 200, 40)
+        self.exit_button_rect = pg.Rect(450, 330, 200, 40)
 
     def startup(self, current_time, persist):
         self.persist = persist
@@ -40,27 +31,21 @@ class GameReportScreen(tool.State):
         self.game_duration = self.game_info.get('game_duration', 0)
         self.zombies_killed = self.game_info.get('zombies_killed', {})
         self.is_offline = self.game_info.get('is_offline', True)
-        self.rank = None
-        self.leaderboard = []
 
-        # 如果是在线模式，提交成绩并获取排行榜
+        # 如果是在线模式，提交成绩
         if not self.is_offline:
             try:
                 player_id = self.game_info.get('player_id')
                 if player_id:
                     # 提交成绩
-                    result = NETWORK.submit_score(
+                    NETWORK.submit_score(
                         player_id,
                         self.score,
                         self.game_duration,
                         self.zombies_killed
                     )
-                    self.rank = result.get('rank')
-
-                    # 获取排行榜
-                    self.leaderboard = NETWORK.get_leaderboard(10)
             except Exception as e:
-                print(f'Failed to submit score or get leaderboard: {e}')
+                print(f'Failed to submit score: {e}')
                 self.is_offline = True
 
     def update(self, surface, current_time, mouse_pos, mouse_click, events):
@@ -70,19 +55,11 @@ class GameReportScreen(tool.State):
         if mouse_pos and mouse_click[0]:
             self.handle_mouse_click(mouse_pos)
 
-        # 检查导出消息是否需要消失
-        if self.export_message and current_time - self.export_message_time > self.export_message_duration:
-            self.export_message = ''
-
         # 绘制页面
         self.draw(surface)
 
     def handle_mouse_click(self, mouse_pos):
         """处理鼠标点击"""
-        # 导出截图
-        if self.export_button_rect.collidepoint(mouse_pos):
-            self.export_screenshot()
-
         # 再来一局
         if self.play_again_button_rect.collidepoint(mouse_pos):
             self.done = True
@@ -91,16 +68,6 @@ class GameReportScreen(tool.State):
         # 退出游戏
         if self.exit_button_rect.collidepoint(mouse_pos):
             pg.event.post(pg.event.Event(pg.QUIT))
-
-    def export_screenshot(self):
-        """导出截图"""
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f'game_report_{timestamp}.png'
-        pg.image.save(pg.display.get_surface(), filename)
-        print(f'Screenshot saved: {filename}')
-        # 显示成功消息
-        self.export_message = f'截图已保存: {filename}'
-        self.export_message_time = self.current_time
 
     def draw(self, surface):
         """绘制游戏报告页面"""
@@ -119,7 +86,7 @@ class GameReportScreen(tool.State):
         surface.blit(title_text, title_rect)
 
         # 左侧：成绩卡片
-        score_card_rect = pg.Rect(30, 100, 360, 180)
+        score_card_rect = pg.Rect(30, 100, 360, 200)
         self.draw_card(surface, score_card_rect, LANG.get('report_score_card'))
 
         # 绘制最终分数
@@ -128,18 +95,6 @@ class GameReportScreen(tool.State):
         surface.blit(score_label, (50, 130))
         score_text = score_font.render(str(self.score), True, c.GOLD)
         surface.blit(score_text, (50, 155))
-
-        # 绘制排名
-        rank_label = pg.font.SysFont('SimHei', 20).render(LANG.get('report_rank'), True, c.LIGHTYELLOW)
-        surface.blit(rank_label, (220, 130))
-        if self.is_offline:
-            rank_text = pg.font.SysFont('SimHei', 20).render(LANG.get('report_offline'), True, c.RED)
-        elif self.rank:
-            rank_display = LANG.get('report_rank_format').format(self.rank)
-            rank_text = pg.font.SysFont('SimHei', 28, bold=True).render(rank_display, True, c.GREEN)
-        else:
-            rank_text = pg.font.SysFont('SimHei', 20).render(LANG.get('report_no_rank'), True, c.ORANGE)
-        surface.blit(rank_text, (220, 155))
 
         # 绘制游戏时长
         duration_seconds = self.game_duration // 1000
@@ -151,13 +106,12 @@ class GameReportScreen(tool.State):
         surface.blit(duration_text, (50, 235))
 
         # 右侧：击杀统计卡片
-        kills_card_rect = pg.Rect(410, 100, 360, 180)
-        kills_card_right_edge = kills_card_rect.x + kills_card_rect.width - 10  # 右边界留10像素边距
+        kills_card_rect = pg.Rect(410, 100, 360, 200)
+        kills_card_right_edge = kills_card_rect.x + kills_card_rect.width - 10
         self.draw_card(surface, kills_card_rect, LANG.get('report_kills_title'))
 
         # 绘制各类僵尸击杀统计
-        kill_font = pg.font.SysFont('SimHei', 16)  # 缩小字体避免溢出
-        y_offset = 140
+        kill_font = pg.font.SysFont('SimHei', 16)
         zombie_name_map = {
             c.NORMAL_ZOMBIE: 'zombie_normal',
             c.CONEHEAD_ZOMBIE: 'zombie_conehead',
@@ -177,11 +131,10 @@ class GameReportScreen(tool.State):
                 zombie_name = LANG.get(zombie_name_map.get(zombie_type, zombie_type))
                 score_value = c.ZOMBIE_SCORES.get(zombie_type, 0)
 
-                # 绘制僵尸名称 - 如果太长则截断
+                # 绘制僵尸名称
                 name_text_content = f"{zombie_name}:"
                 name_text = kill_font.render(name_text_content, True, c.LIGHTYELLOW)
-                if name_text.get_width() > 120:  # 名称最多占120像素
-                    # 缩短僵尸名称
+                if name_text.get_width() > 120:
                     truncated_name = zombie_name[:8] + "..." if len(zombie_name) > 8 else zombie_name
                     name_text = kill_font.render(f"{truncated_name}:", True, c.LIGHTYELLOW)
                 surface.blit(name_text, (430, y_offset))
@@ -190,7 +143,7 @@ class GameReportScreen(tool.State):
                 count_text = kill_font.render(LANG.get('report_count_unit').format(count), True, c.WHITE)
                 surface.blit(count_text, (560, y_offset))
 
-                # 绘制得分 - 确保不超出右边界
+                # 绘制得分
                 score_text_content = f"(+{count * score_value})"
                 score_text = kill_font.render(score_text_content, True, c.GREEN)
                 score_x = min(620, kills_card_right_edge - score_text.get_width())
@@ -198,63 +151,8 @@ class GameReportScreen(tool.State):
 
                 y_offset += 23
 
-        # 底部：排行榜卡片（如果在线）
-        if not self.is_offline and self.leaderboard:
-            leaderboard_card_rect = pg.Rect(30, 300, 740, 200)
-            self.draw_card(surface, leaderboard_card_rect, LANG.get('report_leaderboard'))
-
-            leaderboard_font = pg.font.SysFont('SimHei', 18)
-            y_offset = 340
-
-            # 分两列显示排行榜
-            col1_x = 50
-            col2_x = 410
-
-            for i, entry in enumerate(self.leaderboard[:10], 1):
-                name = entry.get('name', 'Unknown')
-                employee_id = entry.get('employee_id', '')
-                score = entry.get('score', 0)
-
-                # 组合显示姓名和工号（无括号）
-                if employee_id:
-                    display_name = f"{name}{employee_id}"
-                else:
-                    display_name = name
-
-                # 前3名使用特殊颜色
-                if i == 1:
-                    color = c.GOLD
-                elif i == 2:
-                    color = (192, 192, 192)  # 银色
-                elif i == 3:
-                    color = (205, 127, 50)   # 铜色
-                else:
-                    color = c.WHITE
-
-                rank_text = leaderboard_font.render(f"{i}. {display_name}: {score}", True, color)
-
-                # 前5名在左列，后5名在右列
-                if i <= 5:
-                    surface.blit(rank_text, (col1_x, y_offset))
-                    y_offset += 28
-                else:
-                    if i == 6:
-                        y_offset = 340
-                    surface.blit(rank_text, (col2_x, y_offset))
-                    y_offset += 28
-
-        # 绘制按钮（带阴影效果）
+        # 绘制按钮
         button_font = pg.font.SysFont('SimHei', 22)
-        button_y = 520 if (not self.is_offline and self.leaderboard) else 330
-
-        # 更新按钮位置
-        self.export_button_rect.y = button_y
-        self.play_again_button_rect.y = button_y
-        self.exit_button_rect.y = button_y
-
-        # 导出截图按钮
-        self.draw_button(surface, self.export_button_rect, LANG.get('report_export'),
-                        c.SKY_BLUE, c.WHITE, button_font)
 
         # 再来一局按钮
         self.draw_button(surface, self.play_again_button_rect, LANG.get('report_play_again'),
@@ -264,17 +162,8 @@ class GameReportScreen(tool.State):
         self.draw_button(surface, self.exit_button_rect, LANG.get('report_exit'),
                         c.RED, c.WHITE, button_font)
 
-        # 绘制导出截图反馈消息
-        if self.export_message:
-            self.draw_export_message(surface)
-
     def draw_card(self, surface, rect, title):
-        """绘制卡片背景
-        Args:
-            surface: 绘制表面
-            rect: 卡片矩形区域
-            title: 卡片标题
-        """
+        """绘制卡片背景"""
         # 绘制阴影
         shadow_rect = rect.copy()
         shadow_rect.x += 4
@@ -297,15 +186,7 @@ class GameReportScreen(tool.State):
         surface.blit(title_text, title_text_rect)
 
     def draw_button(self, surface, rect, text, bg_color, text_color, font):
-        """绘制按钮
-        Args:
-            surface: 绘制表面
-            rect: 按钮矩形区域
-            text: 按钮文字
-            bg_color: 背景颜色
-            text_color: 文字颜色
-            font: 字体对象
-        """
+        """绘制按钮"""
         # 绘制阴影
         shadow_rect = rect.copy()
         shadow_rect.x += 3
@@ -320,8 +201,7 @@ class GameReportScreen(tool.State):
         button_text = font.render(text, True, text_color)
         text_width = button_text.get_rect().width
 
-        # 如果文字太宽，缩小字体
-        if text_width > rect.width - 20:  # 留出10像素边距
+        if text_width > rect.width - 20:
             scale_factor = (rect.width - 20) / text_width
             smaller_font = pg.font.SysFont('SimHei', int(font.get_height() * scale_factor))
             button_text = smaller_font.render(text, True, text_color)
@@ -329,40 +209,3 @@ class GameReportScreen(tool.State):
         button_text_rect = button_text.get_rect()
         button_text_rect.center = rect.center
         surface.blit(button_text, button_text_rect)
-
-    def draw_export_message(self, surface):
-        """绘制导出截图反馈消息"""
-        # 计算淡入淡出效果
-        elapsed = self.current_time - self.export_message_time
-        if elapsed < 500:
-            # 淡入
-            alpha = int(255 * (elapsed / 500))
-        elif elapsed > self.export_message_duration - 500:
-            # 淡出
-            alpha = int(255 * ((self.export_message_duration - elapsed) / 500))
-        else:
-            alpha = 255
-
-        # 创建消息背景
-        message_width = 600
-        message_height = 60
-        message_x = (c.SCREEN_WIDTH - message_width) // 2
-        message_y = c.SCREEN_HEIGHT - 100
-
-        # 创建半透明表面
-        message_surface = pg.Surface((message_width, message_height))
-        message_surface.set_alpha(alpha)
-        message_surface.fill((50, 150, 50))
-
-        # 绘制边框
-        pg.draw.rect(message_surface, c.WHITE, message_surface.get_rect(), 3, border_radius=10)
-
-        surface.blit(message_surface, (message_x, message_y))
-
-        # 绘制消息文字
-        font = pg.font.SysFont('SimHei', 20)
-        text_surface = font.render(self.export_message, True, c.WHITE)
-        text_surface.set_alpha(alpha)
-        text_rect = text_surface.get_rect()
-        text_rect.center = (c.SCREEN_WIDTH // 2, message_y + 30)
-        surface.blit(text_surface, text_rect)

@@ -4,28 +4,89 @@ import configparser
 import os
 import requests
 
+# 默认配置
+DEFAULT_SERVER_URL = 'http://127.0.0.1:5000'
+DEFAULT_TIMEOUT = 3
+
 
 class NetworkManager:
     """网络管理器，负责与服务器通信"""
 
     def __init__(self):
-        self.server_url = 'http://127.0.0.1:5000'  # 使用 127.0.0.1 避免 DNS 解析
-        self.timeout = 3  # 减少超时时间
-        self.session = requests.Session()  # 复用 TCP 连接
+        self.server_url = DEFAULT_SERVER_URL
+        self.timeout = DEFAULT_TIMEOUT
+        self.session = requests.Session()
+        self.config_path = os.path.join('source', 'config.ini')
         self.load_config()
 
     def load_config(self):
         """从配置文件加载服务器设置"""
         try:
             config = configparser.ConfigParser()
-            config_path = os.path.join('source', 'config.ini')
-            config.read(config_path)
+            if os.path.exists(self.config_path):
+                config.read(self.config_path, encoding='utf-8')
 
-            if 'Server' in config:
-                self.server_url = config['Server'].get('url', self.server_url)
-                self.timeout = int(config['Server'].get('timeout', self.timeout))
+                if 'Server' in config:
+                    url = config['Server'].get('url', '').strip()
+                    if url:
+                        self.server_url = url
+                    timeout = config['Server'].get('timeout', '')
+                    if timeout:
+                        self.timeout = int(timeout)
         except Exception as e:
             print(f'Failed to load config: {e}')
+            # 使用默认配置
+            self.server_url = DEFAULT_SERVER_URL
+            self.timeout = DEFAULT_TIMEOUT
+
+    def save_config(self, server_url):
+        """保存服务器配置到文件"""
+        try:
+            config = configparser.ConfigParser()
+            # 读取现有配置
+            if os.path.exists(self.config_path):
+                config.read(self.config_path, encoding='utf-8')
+
+            # 更新服务器配置
+            if 'Server' not in config:
+                config['Server'] = {}
+            config['Server']['url'] = server_url
+            config['Server']['timeout'] = str(self.timeout)
+
+            # 写入文件
+            with open(self.config_path, 'w', encoding='utf-8') as f:
+                config.write(f)
+
+            # 更新当前配置
+            self.server_url = server_url
+            return True
+        except Exception as e:
+            print(f'Failed to save config: {e}')
+            return False
+
+    def update_server_url(self, server_url):
+        """动态更新服务器地址（不保存到文件）"""
+        self.server_url = server_url
+
+    def get_server_url(self):
+        """获取当前服务器地址"""
+        return self.server_url
+
+    def test_connection(self, server_url=None):
+        """
+        测试服务器连接
+        Args:
+            server_url: 要测试的服务器地址，如果为 None 则使用当前配置
+        Returns:
+            bool: 如果连接成功返回 True
+        """
+        url = server_url or self.server_url
+        try:
+            response = self.session.get(f'{url}/api/health', timeout=self.timeout)
+            return response.status_code == 200
+        except Exception as e:
+            print(f'Connection test failed: {e}')
+            return False
 
     def check_connection(self):
         """
@@ -33,12 +94,7 @@ class NetworkManager:
         Returns:
             bool: 如果连接成功返回 True
         """
-        try:
-            response = self.session.get(f'{self.server_url}/api/health', timeout=self.timeout)
-            return response.status_code == 200
-        except Exception as e:
-            print(f'Connection check failed: {e}')
-            return False
+        return self.test_connection()
 
     def login(self, name, employee_id):
         """

@@ -37,6 +37,18 @@ class LanguageManager:
             'login_name_empty': '请输入姓名',
             'login_id_empty': '请输入工号',
 
+            # Settings
+            'settings_button': '设置',
+            'settings_title': '服务器设置',
+            'settings_server_url': '服务器地址：',
+            'settings_test': '测试连接',
+            'settings_save': '保存',
+            'settings_cancel': '取消',
+            'settings_test_success': '连接成功',
+            'settings_test_failed': '连接失败',
+            'settings_save_success': '保存成功',
+            'settings_save_failed': '保存失败',
+
             # Main Menu
             'menu_adventure': '开始冒险',
             'menu_crazy_mode': '疯狂模式',
@@ -97,6 +109,18 @@ class LanguageManager:
             'login_error': 'Login failed: ',
             'login_name_empty': 'Please enter your name',
             'login_id_empty': 'Please enter your employee ID',
+
+            # Settings
+            'settings_button': 'Settings',
+            'settings_title': 'Server Settings',
+            'settings_server_url': 'Server URL:',
+            'settings_test': 'Test',
+            'settings_save': 'Save',
+            'settings_cancel': 'Cancel',
+            'settings_test_success': 'Connected',
+            'settings_test_failed': 'Connection Failed',
+            'settings_save_success': 'Saved',
+            'settings_save_failed': 'Save Failed',
 
             # Main Menu
             'menu_adventure': 'Adventure',

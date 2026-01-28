@@ -2,20 +2,29 @@
 Flask 服务器主程序
 """
 
-from flask import Flask
+import os
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 from .api import api
 from . import config
 
 def create_app():
     """创建 Flask 应用"""
-    app = Flask(__name__)
+    # 获取静态文件目录路径
+    static_folder = os.path.join(os.path.dirname(__file__), 'static')
+
+    app = Flask(__name__, static_folder=static_folder)
 
     # 启用 CORS 支持跨域请求
     CORS(app)
 
     # 注册 API 蓝图
     app.register_blueprint(api, url_prefix='/api')
+
+    # 根路由返回排行榜页面
+    @app.route('/')
+    def index():
+        return send_from_directory(static_folder, 'index.html')
 
     return app
 
