@@ -76,15 +76,22 @@ class Level(tool.State):
         tool.State.__init__(self)
     
     def startup(self, current_time, persist):
+        import time
+        t0 = time.time()
         self.game_info = persist
         self.persist = self.game_info
         self.game_info[c.CURRENT_TIME] = current_time
         self.map_y_len = c.GRID_Y_LEN
         self.map = map.Map(c.GRID_X_LEN, self.map_y_len)
-        
+
+        t1 = time.time()
         self.loadMap()
+        t2 = time.time()
         self.setupBackground()
+        t3 = time.time()
         self.initState()
+        t4 = time.time()
+        print(f'[DEBUG] Level.startup: map={t1-t0:.3f}s, loadMap={t2-t1:.3f}s, setupBg={t3-t2:.3f}s, initState={t4-t3:.3f}s')
 
     def loadMap(self):
         map_file = 'level_' + str(self.game_info[c.LEVEL_NUM]) + '.json'

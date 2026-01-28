@@ -252,10 +252,15 @@ class MenuBar():
 
 class Panel():
     def __init__(self, card_list, sun_value):
+        import time
+        t0 = time.time()
         self.loadImages(sun_value)
+        t1 = time.time()
         self.selected_cards = []
         self.selected_num = 0
         self.setupCards(card_list)
+        t2 = time.time()
+        print(f'[DEBUG] Panel.__init__: loadImages={t1-t0:.3f}s, setupCards={t2-t1:.3f}s')
 
     def loadFrame(self, name):
         frame = tool.GFX[name]

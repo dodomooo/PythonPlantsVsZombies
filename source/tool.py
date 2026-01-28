@@ -63,10 +63,15 @@ class Control():
         self.events = []  # 清空事件列表
 
     def flip_state(self):
+        import time
+        t0 = time.time()
         previous, self.state_name = self.state_name, self.state.next
         persist = self.state.cleanup()
         self.state = self.state_dict[self.state_name]
+        t1 = time.time()
         self.state.startup(self.current_time, persist)
+        t2 = time.time()
+        print(f'[DEBUG] flip_state: {previous} -> {self.state_name}, cleanup: {t1-t0:.3f}s, startup: {t2-t1:.3f}s')
 
     def event_loop(self):
         self.events = pg.event.get()  # 获取所有事件

@@ -2,14 +2,16 @@ __author__ = 'marble_xu'
 
 import configparser
 import os
+import requests
 
 
 class NetworkManager:
     """网络管理器，负责与服务器通信"""
 
     def __init__(self):
-        self.server_url = 'http://localhost:5000'
-        self.timeout = 5
+        self.server_url = 'http://127.0.0.1:5000'  # 使用 127.0.0.1 避免 DNS 解析
+        self.timeout = 3  # 减少超时时间
+        self.session = requests.Session()  # 复用 TCP 连接
         self.load_config()
 
     def load_config(self):
@@ -32,8 +34,7 @@ class NetworkManager:
             bool: 如果连接成功返回 True
         """
         try:
-            import requests
-            response = requests.get(f'{self.server_url}/api/health', timeout=self.timeout)
+            response = self.session.get(f'{self.server_url}/api/health', timeout=self.timeout)
             return response.status_code == 200
         except Exception as e:
             print(f'Connection check failed: {e}')
@@ -49,8 +50,7 @@ class NetworkManager:
             dict: 包含 player_id 的字典，失败时抛出异常
         """
         try:
-            import requests
-            response = requests.post(
+            response = self.session.post(
                 f'{self.server_url}/api/login',
                 json={'name': name, 'employee_id': employee_id},
                 timeout=self.timeout
@@ -78,7 +78,6 @@ class NetworkManager:
             dict: 包含 rank 的字典，失败时抛出异常
         """
         try:
-            import requests
             # 将击杀统计转换为服务器需要的格式
             zombie_details = []
             for zombie_type, count in zombies_killed.items():
@@ -88,7 +87,7 @@ class NetworkManager:
                         'count': count
                     })
 
-            response = requests.post(
+            response = self.session.post(
                 f'{self.server_url}/api/submit_score',
                 json={
                     'player_id': player_id,
@@ -114,8 +113,7 @@ class NetworkManager:
             list: 排行榜记录列表，失败时抛出异常
         """
         try:
-            import requests
-            response = requests.get(
+            response = self.session.get(
                 f'{self.server_url}/api/leaderboard',
                 params={'limit': limit},
                 timeout=self.timeout

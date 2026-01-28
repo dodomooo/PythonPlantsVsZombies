@@ -122,6 +122,9 @@ class LoginScreen(tool.State):
 
     def do_login(self):
         """执行登录"""
+        import time
+        t0 = time.time()
+
         # 验证输入
         if not self.name_text.strip():
             self.error_message = LANG.get('login_name_empty')
@@ -137,15 +140,13 @@ class LoginScreen(tool.State):
         self.game_info['player_name'] = self.name_text.strip()
         self.game_info['employee_id'] = self.employee_id_text.strip()
 
-        # 尝试连接服务器并登录
+        # 尝试连接服务器并登录（直接登录，无需预先检查连接）
         self.connecting = True
         try:
-            # 检查服务器连接
-            if not NETWORK.check_connection():
-                raise Exception('服务器未响应')
-
-            # 登录
+            # 直接登录，login 失败会自动抛出异常
             result = NETWORK.login(self.name_text.strip(), self.employee_id_text.strip())
+            t1 = time.time()
+            print(f'[DEBUG] login: {t1-t0:.3f}s')
             self.game_info['player_id'] = result.get('player_id')
             self.game_info['is_offline'] = False
             self.is_offline = False
@@ -159,6 +160,7 @@ class LoginScreen(tool.State):
             self.game_info['player_id'] = None
 
         self.connecting = False
+        print(f'[DEBUG] do_login total: {time.time()-t0:.3f}s')
 
         # 跳转到主菜单
         self.done = True

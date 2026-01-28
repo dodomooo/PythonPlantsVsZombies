@@ -42,6 +42,7 @@ class Menu(tool.State):
         self.option_clicked = False
     
     def checkOptionClick(self, mouse_pos):
+        import time
         x, y = mouse_pos
         if(x >= self.option_rect.x and x <= self.option_rect.right and
            y >= self.option_rect.y and y <= self.option_rect.bottom):
@@ -50,6 +51,7 @@ class Menu(tool.State):
             # 设置疯狂模式标志，使用特殊关卡名
             self.game_info['is_crazy_mode'] = True
             self.game_info[c.LEVEL_NUM] = 'crazy'
+            print(f'[DEBUG] Option clicked at time={self.current_time}')
         return False
         
     def update(self, surface, current_time, mouse_pos, mouse_click, events):
@@ -65,7 +67,7 @@ class Menu(tool.State):
                     self.option_frame_index = 0
                 self.option_timer = self.current_time
                 self.option_image = self.option_frames[self.option_frame_index]
-            if(self.current_time - self.option_start) > 1300:
+            if(self.current_time - self.option_start) > 500:
                 self.done = True
 
         surface.blit(self.bg_image, self.bg_rect)
