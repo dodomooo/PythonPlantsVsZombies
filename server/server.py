@@ -3,6 +3,7 @@ Flask 服务器主程序
 """
 
 import os
+import sys
 import webbrowser
 import threading
 from flask import Flask, send_from_directory
@@ -33,6 +34,8 @@ def create_app():
 
 def main():
     """启动服务器"""
+    werkzeug_run_main = os.environ.get('WERKZEUG_RUN_MAIN')
+
     app = create_app()
 
     # 构造访问地址
@@ -42,14 +45,22 @@ def main():
     print(f'Access the server at {url}')
     print('Press Ctrl+C to stop the server')
 
-    # 只在非 reloader 主进程中打开浏览器（避免 debug 模式下打开多个标签页）
-    if not os.environ.get('WERKZEUG_RUN_MAIN'):
+    # 只在主进程中打开浏览器（避免 reloader 重启时重复打开）
+    # 主进程的 WERKZEUG_RUN_MAIN 为 None，子进程为 'true'
+    if not werkzeug_run_main:
         def open_browser():
-            print(f'Opening browser at {url}')
-            webbrowser.open(url)
+            print(f'Opening browser at {url}', flush=True)
+            try:
+                if sys.platform == 'win32':
+                    # Windows: 使用 os.startfile 直接调用系统 URL 处理
+                    os.startfile(url)
+                else:
+                    webbrowser.open(url)
+            except Exception as e:
+                print(f'Failed to open browser: {e}', flush=True)
 
-        # 使用定时器在1.5秒后打开浏览器
-        timer = threading.Timer(1.5, open_browser)
+        # 使用定时器在1秒后打开浏览器
+        timer = threading.Timer(1.0, open_browser)
         timer.daemon = True
         timer.start()
 

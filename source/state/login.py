@@ -26,8 +26,8 @@ class LoginScreen(tool.State):
 
         # 按钮位置
         self.login_button_rect = pg.Rect(300, 400, 200, 50)
-        self.settings_button_rect = pg.Rect(550, 50, 100, 40)
-        self.language_button_rect = pg.Rect(670, 50, 100, 40)
+        self.settings_button_rect = pg.Rect(655, 15, 65, 28)
+        self.language_button_rect = pg.Rect(730, 15, 55, 28)
 
         # 设置弹窗状态
         self.show_settings = False
@@ -324,20 +324,21 @@ class LoginScreen(tool.State):
         button_text_rect.center = self.login_button_rect.center
         surface.blit(button_text, button_text_rect)
 
-        # 绘制设置按钮
-        settings_button_color = (80, 80, 120)
-        pg.draw.rect(surface, settings_button_color, self.settings_button_rect)
-        pg.draw.rect(surface, c.WHITE, self.settings_button_rect, 2)
-        settings_text = label_font.render(LANG.get('settings_button'), True, c.WHITE)
+        # 绘制设置按钮 - 使用小字体和低调颜色
+        small_font = pg.font.SysFont('SimHei', 14)
+        settings_button_color = (60, 60, 80)  # 更暗的颜色
+        pg.draw.rect(surface, settings_button_color, self.settings_button_rect, border_radius=3)
+        pg.draw.rect(surface, (100, 100, 120), self.settings_button_rect, 1, border_radius=3)  # 更细的边框
+        settings_text = small_font.render(LANG.get('settings_button'), True, (180, 180, 200))  # 更低调的文字颜色
         settings_text_rect = settings_text.get_rect()
         settings_text_rect.center = self.settings_button_rect.center
         surface.blit(settings_text, settings_text_rect)
 
-        # 绘制语言切换按钮
-        lang_button_color = (120, 100, 150)
-        pg.draw.rect(surface, lang_button_color, self.language_button_rect)
-        pg.draw.rect(surface, c.WHITE, self.language_button_rect, 2)
-        lang_text = label_font.render(LANG.get('login_switch_language'), True, c.WHITE)
+        # 绘制语言切换按钮 - 使用小字体和低调颜色
+        lang_button_color = (70, 60, 90)  # 更暗的颜色
+        pg.draw.rect(surface, lang_button_color, self.language_button_rect, border_radius=3)
+        pg.draw.rect(surface, (110, 100, 130), self.language_button_rect, 1, border_radius=3)  # 更细的边框
+        lang_text = small_font.render(LANG.get('login_switch_language'), True, (180, 180, 200))  # 更低调的文字颜色
         lang_text_rect = lang_text.get_rect()
         lang_text_rect.center = self.language_button_rect.center
         surface.blit(lang_text, lang_text_rect)
