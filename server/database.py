@@ -33,25 +33,34 @@ class Database:
 
     def get_or_create_player(self, name, employee_id):
         """
-        获取或创建玩家
+        获取或创建玩家（工号唯一标识）
         Args:
             name: 玩家姓名
-            employee_id: 工号
+            employee_id: 工号（唯一标识）
         Returns:
             int: 玩家ID
         """
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        # 尝试查找现有玩家
+        # 只用 employee_id 查询
         cursor.execute(
-            'SELECT id FROM players WHERE name = ? AND employee_id = ?',
-            (name, employee_id)
+            'SELECT id, name FROM players WHERE employee_id = ?',
+            (employee_id,)
         )
         row = cursor.fetchone()
 
         if row:
             player_id = row['id']
+            old_name = row['name']
+            # 如果姓名不同，更新姓名
+            if old_name != name:
+                cursor.execute(
+                    'UPDATE players SET name = ? WHERE id = ?',
+                    (name, player_id)
+                )
+                conn.commit()
+                print(f'Updated player name: {old_name} -> {name} (employee_id={employee_id})')
         else:
             # 创建新玩家
             cursor.execute(
@@ -94,11 +103,21 @@ class Database:
 
         conn.commit()
 
-        # 计算排名
-        cursor.execute(
-            'SELECT COUNT(*) + 1 as rank FROM game_records WHERE score > ?',
-            (score,)
-        )
+        # 计算排名（按每个玩家的最高分去重）
+        cursor.execute('''
+            SELECT COUNT(DISTINCT p.employee_id) + 1 as rank
+            FROM (
+                SELECT p2.employee_id, MAX(g2.score) as max_score
+                FROM game_records g2
+                JOIN players p2 ON g2.player_id = p2.id
+                GROUP BY p2.employee_id
+            ) p
+            WHERE p.max_score > (
+                SELECT MAX(g3.score)
+                FROM game_records g3
+                WHERE g3.player_id = ?
+            )
+        ''', (player_id,))
         rank = cursor.fetchone()['rank']
 
         conn.close()
@@ -106,7 +125,7 @@ class Database:
 
     def get_leaderboard(self, limit=10):
         """
-        获取排行榜
+        获取排行榜（每个工号只显示最高分）
         Args:
             limit: 返回记录数
         Returns:
@@ -115,10 +134,19 @@ class Database:
         conn = self.get_connection()
         cursor = conn.cursor()
 
+        # 使用子查询为每个 employee_id 选择最高分的记录
         cursor.execute('''
             SELECT p.name, p.employee_id, g.score, g.game_duration, g.created_at
             FROM game_records g
             JOIN players p ON g.player_id = p.id
+            WHERE g.id IN (
+                SELECT g2.id
+                FROM game_records g2
+                JOIN players p2 ON g2.player_id = p2.id
+                WHERE p2.employee_id = p.employee_id
+                ORDER BY g2.score DESC, g2.created_at ASC
+                LIMIT 1
+            )
             ORDER BY g.score DESC, g.created_at ASC
             LIMIT ?
         ''', (limit,))
