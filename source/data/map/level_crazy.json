@@ -1,6 +1,6 @@
 {
     "background_type": 0,
-    "init_sun_value": 1000,
+    "init_sun_value": 1500,
     "game_mode": "crazy",
     "game_duration": 120000,
     "zombie_list": [],
