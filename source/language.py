@@ -20,13 +20,13 @@ class LanguageManager:
         """中文翻译"""
         return {
             # Loading Screen
-            'loading_story_1': '在数字世界的深处，安全产品如同坚固的城墙守护着客户的数字资产...',
-            'loading_story_2': '每一次攻击的防御，都是技术与智慧的较量...',
-            'loading_story_3': '我们用代码编织防护网，用算法构筑安全屏障...',
-            'loading_story_4': '守护客户的信任，是我们永恒的使命！',
+            'loading_story_1': '数智化浪潮下，企业的核心资产正面临前所未有的威胁！',
+            'loading_story_2': '你是用户的首席安全官，在深信服 GPT 强力 AI 引擎的加持下，构筑最后一道数字防线。',
+            'loading_story_3': '这不是一场持久战，而是一场2分钟的极限生存赛。',
+            'loading_story_4': '面对汹涌而来的各种变种病毒和黑客攻击，你需要迅速部署深信服安全产品矩阵，精准拦截，守护企业数据安全！',
 
             # Login Screen
-            'login_title': '欢迎来到植物大战僵尸疯狂模式',
+            'login_title': 'GPT助力：安全保卫战',
             'login_name': '姓名：',
             'login_employee_id': '工号：',
             'login_button': '开始游戏',
@@ -94,13 +94,13 @@ class LanguageManager:
         """英文翻译"""
         return {
             # Loading Screen
-            'loading_story_1': 'In the depths of the digital world, security products stand as fortresses protecting customer assets...',
-            'loading_story_2': 'Every defense against attacks is a battle of technology and wisdom...',
-            'loading_story_3': 'We weave protection with code and build security barriers with algorithms...',
-            'loading_story_4': 'Protecting customer trust is our eternal mission!',
+            'loading_story_1': 'In the wave of digital intelligence, enterprise core assets are facing unprecedented threats!',
+            'loading_story_2': 'You are the Chief Security Officer, empowered by Sangfor GPT AI engine to build the last line of digital defense.',
+            'loading_story_3': 'This is not a prolonged battle, but a 2-minute extreme survival challenge.',
+            'loading_story_4': 'Facing the onslaught of virus variants and hacker attacks, deploy Sangfor security products to protect enterprise data!',
 
             # Login Screen
-            'login_title': 'Welcome to Plants vs Zombies Crazy Mode',
+            'login_title': 'GPT Powered: Security Defense',
             'login_name': 'Name:',
             'login_employee_id': 'Employee ID:',
             'login_button': 'Start Game',
