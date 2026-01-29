@@ -273,9 +273,13 @@ class LoginScreen(tool.State):
         self.connecting = False
         print(f'[DEBUG] do_login total: {time.time()-t0:.3f}s')
 
-        # 跳转到主菜单
+        # 设置游戏模式信息（原本在主菜单中设置）
+        self.game_info['is_crazy_mode'] = True
+        self.game_info[c.LEVEL_NUM] = 'crazy'
+
+        # 直接进入游戏关卡，跳过冒险模式页面
         self.done = True
-        self.next = c.MAIN_MENU
+        self.next = c.LEVEL
 
     def toggle_language(self):
         """切换语言"""
