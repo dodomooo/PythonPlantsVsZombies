@@ -407,9 +407,7 @@ class Level(tool.State):
             rect = frame_list[0].get_rect()
             width, height = rect.w, rect.h
 
-        if (plant_name == c.POTATOMINE or plant_name == c.SQUASH or
-            plant_name == c.SPIKEWEED or plant_name == c.JALAPENO or
-            plant_name == c.SCAREDYSHROOM or plant_name == c.SUNSHROOM or
+        if (plant_name == c.SCAREDYSHROOM or plant_name == c.SUNSHROOM or
             plant_name == c.ICESHROOM or plant_name == c.HYPNOSHROOM or
             plant_name == c.WALLNUTBOWLING or plant_name == c.REDWALLNUTBOWLING):
             color = c.WHITE

@@ -495,17 +495,16 @@ class PotatoMine(Plant):
         self.init_frames = []
         self.idle_frames = []
         self.explode_frames = []
-        
+
         init_name = name + 'Init'
         idle_name = name
         explode_name = name + 'Explode'
-        
+
         frame_list = [self.init_frames, self.idle_frames, self.explode_frames]
         name_list = [init_name, idle_name, explode_name]
 
         for i, name in enumerate(name_list):
-            self.loadFrames(frame_list[i], name, 1, c.WHITE)
-
+            self.loadFrames(frame_list[i], name, 1)  # idle 用黑色（透明背景）
         self.frames = self.init_frames
 
     def idling(self):
@@ -540,16 +539,19 @@ class Squash(Plant):
         self.idle_frames = []
         self.aim_frames = []
         self.attack_frames = []
-        
+
         idle_name = name
         aim_name = name + 'Aim'
         attack_name = name + 'Attack'
-        
+
         frame_list = [self.idle_frames, self.aim_frames, self.attack_frames]
         name_list = [idle_name, aim_name, attack_name]
 
         for i, name in enumerate(name_list):
-            self.loadFrames(frame_list[i], name, 1, c.WHITE)
+            if name == idle_name:
+                self.loadFrames(frame_list[i], name, 1)  # idle 用黑色（透明背景）
+            else:
+                self.loadFrames(frame_list[i], name, 1, c.WHITE)  # aim 和 attack 用白色
 
         self.frames = self.idle_frames
 
@@ -590,7 +592,7 @@ class Spikeweed(Plant):
         self.attack_timer = 0
 
     def loadImages(self, name, scale):
-        self.loadFrames(self.frames, name, 0.9, c.WHITE)
+        self.loadFrames(self.frames, name, 0.9)  # 使用默认黑色 colorkey
 
     def setIdle(self):
         print('spikeweed idle')
@@ -628,8 +630,8 @@ class Jalapeno(Plant):
         self.explode_frames = []
         explode_name = name + 'Explode'
         self.loadFrames(self.explode_frames, explode_name, 1, c.WHITE)
-        
-        self.loadFrames(self.frames, name, 1, c.WHITE)
+
+        self.loadFrames(self.frames, name, 1)  # idle 用默认黑色
 
     def setExplode(self):
         self.changeFrames(self.explode_frames)
