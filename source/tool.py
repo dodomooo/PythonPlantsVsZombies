@@ -281,7 +281,7 @@ def fadeInText(surface, text, alpha, pos, font_size=30, color=c.WHITE):
 
 pg.init()
 pg.display.set_caption(c.ORIGINAL_CAPTION)
-SCREEN = pg.display.set_mode(c.SCREEN_SIZE)
+SCREEN = pg.display.set_mode(c.SCREEN_SIZE, pg.RESIZABLE | pg.SCALED)
 
 GFX = load_all_gfx(os.path.join("resources","graphics"))
 ZOMBIE_RECT = loadZombieImageRect()
