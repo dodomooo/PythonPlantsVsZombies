@@ -63,7 +63,7 @@ class GameReportScreen(tool.State):
                 print(f'Failed to submit score or get leaderboard: {e}')
                 self.is_offline = True
 
-    def update(self, surface, current_time, mouse_pos, mouse_click, events):
+    def update(self, surface, current_time, mouse_pos, mouse_click, events, mouse_hover_pos=None):
         self.current_time = current_time
 
         # 处理鼠标点击

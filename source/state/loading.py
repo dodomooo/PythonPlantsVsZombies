@@ -19,6 +19,7 @@ class LoadingScreen(tool.State):
         self.fade_in_speed = 5  # 渐入速度
         self.max_alpha = 255
         self.total_duration = 10000  # 总时长10秒
+        self.first_update = True  # 标记是否为首次更新
 
     def startup(self, current_time, persist):
         self.persist = persist
@@ -27,6 +28,7 @@ class LoadingScreen(tool.State):
         self.story_start_time = current_time
         self.current_story_index = 0
         self.alpha = 0
+        self.first_update = True  # 重置首次更新标志
 
         # 加载故事文本
         self.stories = [
@@ -36,8 +38,14 @@ class LoadingScreen(tool.State):
             LANG.get('loading_story_4'),
         ]
 
-    def update(self, surface, current_time, mouse_pos, mouse_click, events):
+    def update(self, surface, current_time, mouse_pos, mouse_click, events, mouse_hover_pos=None):
         self.current_time = current_time
+
+        # 首次更新时重新初始化时间（解决 startup 时传入的 current_time 为 0 的问题）
+        if self.first_update:
+            self.first_update = False
+            self.start_time = current_time
+            self.story_start_time = current_time
 
         # 检查总时长，超过10秒自动跳转
         if current_time - self.start_time >= self.total_duration:

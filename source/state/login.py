@@ -77,7 +77,7 @@ class LoginScreen(tool.State):
         # 设置 IME 候选框显示在输入框下方
         pg.key.set_text_input_rect(pg.Rect(rect[0], rect[1] + rect[3], rect[2], rect[3]))
 
-    def update(self, surface, current_time, mouse_pos, mouse_click, events):
+    def update(self, surface, current_time, mouse_pos, mouse_click, events, mouse_hover_pos=None):
         self.current_time = current_time
 
         # 处理输入

@@ -11,6 +11,54 @@ PANEL_Y_INTERNAL = 74
 PANEL_X_INTERNAL = 53
 CARD_LIST_NUM = 8
 
+# 植物中文名称映射
+PLANT_DISPLAY_NAMES = {
+    c.SUNFLOWER: '向日葵',
+    c.PEASHOOTER: '豌豆射手',
+    c.SNOWPEASHOOTER: '寒冰射手',
+    c.WALLNUT: '坚果墙',
+    c.CHERRYBOMB: '樱桃炸弹',
+    c.THREEPEASHOOTER: '三线射手',
+    c.REPEATERPEA: '双发射手',
+    c.CHOMPER: '大嘴花',
+    c.POTATOMINE: '土豆雷',
+    c.SQUASH: '窝瓜',
+    c.SPIKEWEED: '地刺',
+    c.JALAPENO: '火爆辣椒',
+}
+
+# 植物对应的 Sangfor 产品名称
+PLANT_PRODUCT_NAMES = {
+    c.SUNFLOWER: 'SecGPT',
+    c.PEASHOOTER: 'aES Antivirus',
+    c.REPEATERPEA: 'aES DR2.0',
+    c.THREEPEASHOOTER: 'XDR',
+    c.SNOWPEASHOOTER: 'SIP',
+    c.WALLNUT: 'AF + SASE',
+    c.CHERRYBOMB: 'MSS',
+    c.CHOMPER: 'AC',
+    c.POTATOMINE: 'ZTP',
+    c.SQUASH: 'DSP',
+    c.SPIKEWEED: 'aTrust',
+    c.JALAPENO: 'AI Security Platform',
+}
+
+# 植物对应的产品说明
+PLANT_PRODUCT_DESC = {
+    c.SUNFLOWER: '阳光是AI能力，护栏是AI护栏',
+    c.PEASHOOTER: '终端杀毒',
+    c.REPEATERPEA: '终端行为级检测与响应',
+    c.THREEPEASHOOTER: '扩展检测与响应平台',
+    c.SNOWPEASHOOTER: '安全感知管理平台',
+    c.WALLNUT: 'AF+SASE组网安全解决方案',
+    c.CHERRYBOMB: '安全托管服务',
+    c.CHOMPER: '下一代上网行为管理',
+    c.POTATOMINE: '零信任防护平台',
+    c.SQUASH: '数据安全平台',
+    c.SPIKEWEED: '零信任访问控制系统',
+    c.JALAPENO: 'AI安全平台',
+}
+
 card_name_list = [c.CARD_SUNFLOWER, c.CARD_PEASHOOTER, c.CARD_SNOWPEASHOOTER, c.CARD_WALLNUT,
                   c.CARD_CHERRYBOMB, c.CARD_THREEPEASHOOTER, c.CARD_REPEATERPEA, c.CARD_CHOMPER,
                   c.CARD_POTATOMINE, c.CARD_SQUASH, c.CARD_SPIKEWEED, c.CARD_JALAPENO]
@@ -92,6 +140,14 @@ class Card():
             return True
         return False
 
+    def checkMouseHover(self, mouse_pos):
+        """检测鼠标是否悬浮在卡片上"""
+        if mouse_pos is None:
+            return False
+        x, y = mouse_pos
+        return (self.rect.x <= x <= self.rect.right and
+                self.rect.y <= y <= self.rect.bottom)
+
     def canClick(self, sun_value, current_time):
         if self.sun_cost <= sun_value and (current_time - self.frozen_timer) > self.frozen_time:
             return True
@@ -144,10 +200,11 @@ class MenuBar():
         self.rect = self.image.get_rect()
         self.rect.x = 10
         self.rect.y = 0
-        
+
         self.sun_value = sun_value
         self.card_offset_x = 32
         self.setupCards(card_list)
+        self.tooltip = Tooltip()
 
     def loadFrame(self, name):
         frame = tool.GFX[name]
@@ -156,10 +213,24 @@ class MenuBar():
 
         self.image = tool.get_image(tool.GFX[name], *frame_rect, c.WHITE, 1)
 
-    def update(self, current_time):
+    def update(self, current_time, mouse_hover_pos=None):
         self.current_time = current_time
         for card in self.card_list:
             card.update(self.sun_value, self.current_time)
+        self.checkCardHover(mouse_hover_pos)
+        self.tooltip.update(current_time)
+
+    def checkCardHover(self, mouse_hover_pos):
+        """检查卡片悬浮状态并更新 Tooltip"""
+        if mouse_hover_pos is None:
+            self.tooltip.hide()
+            return
+
+        for card in self.card_list:
+            if card.checkMouseHover(mouse_hover_pos):
+                self.tooltip.show(card, self.current_time)
+                return
+        self.tooltip.hide()
 
     def createImage(self, x, y, num):
         if num == 1:
@@ -337,6 +408,7 @@ class MenuBar():
         surface.blit(self.image, self.rect)
         for card in self.card_list:
             card.draw(surface)
+        self.tooltip.draw(surface)
 
 class Panel():
     def __init__(self, card_list, sun_value):
@@ -348,6 +420,7 @@ class Panel():
         self.selected_num = 0
         self.setupCards(card_list)
         t2 = time.time()
+        self.tooltip = Tooltip()
         print(f'[DEBUG] Panel.__init__: loadImages={t1-t0:.3f}s, setupCards={t2-t1:.3f}s')
 
     def loadFrame(self, name):
@@ -438,6 +511,31 @@ class Panel():
             card_index_list.append(card.name_index)
         return card_index_list
 
+    def update(self, current_time, mouse_hover_pos=None):
+        """更新 Panel 状态，包括 Tooltip"""
+        self.current_time = current_time
+        self.checkCardHover(mouse_hover_pos)
+        self.tooltip.update(current_time)
+
+    def checkCardHover(self, mouse_hover_pos):
+        """检查卡片悬浮状态并更新 Tooltip"""
+        if mouse_hover_pos is None:
+            self.tooltip.hide()
+            return
+
+        # 先检查选中的卡片
+        for card in self.selected_cards:
+            if card.checkMouseHover(mouse_hover_pos):
+                self.tooltip.show(card, self.current_time)
+                return
+
+        # 再检查面板中的卡片
+        for card in self.card_list:
+            if card.checkMouseHover(mouse_hover_pos):
+                self.tooltip.show(card, self.current_time)
+                return
+        self.tooltip.hide()
+
     def draw(self, surface):
         self.menu_image.blit(self.value_image, self.value_rect)
         surface.blit(self.menu_image, self.menu_rect)
@@ -449,6 +547,7 @@ class Panel():
 
         if self.selected_num == CARD_LIST_NUM:
             surface.blit(self.button_image, self.button_rect)
+        self.tooltip.draw(surface)
 
 class MoveCard():
     def __init__(self, x, y, card_name, plant_name, scale=0.78):
@@ -583,3 +682,244 @@ class MoveBar():
         surface.blit(self.image, self.rect)
         for card in self.card_list:
             card.draw(surface)
+
+
+class Tooltip:
+    """植物卡片悬浮提示框"""
+
+    # 动画帧间隔（毫秒）
+    ANIMATION_INTERVAL = 100
+    # Tooltip 尺寸
+    TOOLTIP_WIDTH = 230
+    TOOLTIP_HEIGHT = 130
+    # 植物图像显示尺寸
+    PLANT_DISPLAY_SIZE = 70
+    # 内边距
+    PADDING = 8
+    # 行间距
+    LINE_SPACING = 2
+
+    def __init__(self):
+        self.visible = False
+        self.image = None
+        self.rect = None
+        self.plant_name_index = -1
+        self.animation_frames = None
+        self.frame_index = 0
+        self.animation_timer = 0
+        self.card_rect = None
+
+    def show(self, card, current_time):
+        """显示 Tooltip"""
+        plant_name = plant_name_list[card.name_index]
+
+        # 如果已经显示同一个植物的 Tooltip，只更新位置
+        if self.visible and self.plant_name_index == card.name_index:
+            self._updatePosition(card.rect)
+            return
+
+        self.plant_name_index = card.name_index
+        self.visible = True
+        self.card_rect = card.rect
+        self.frame_index = 0
+        self.animation_timer = current_time
+
+        # 加载植物动画帧
+        self._loadAnimationFrames(plant_name)
+
+        # 构建 Tooltip Surface
+        self._buildTooltipSurface(plant_name, current_time)
+
+        # 计算位置
+        self._updatePosition(card.rect)
+
+    def hide(self):
+        """隐藏 Tooltip"""
+        if self.visible:
+            self.visible = False
+            self.plant_name_index = -1
+            self.animation_frames = None
+            self.image = None
+
+    def _loadAnimationFrames(self, plant_name):
+        """加载植物动画帧"""
+        if plant_name in tool.ORIGIN_GFX:
+            self.animation_frames = tool.ORIGIN_GFX[plant_name]
+        elif plant_name in tool.GFX:
+            frames = tool.GFX[plant_name]
+            if isinstance(frames, list):
+                self.animation_frames = frames
+            else:
+                self.animation_frames = [frames]
+        else:
+            self.animation_frames = None
+
+    def _wrapText(self, text, font, max_width):
+        """文本自动换行"""
+        lines = []
+        current_line = ''
+        for char in text:
+            test_line = current_line + char
+            if font.size(test_line)[0] <= max_width:
+                current_line = test_line
+            else:
+                if current_line:
+                    lines.append(current_line)
+                current_line = char
+        if current_line:
+            lines.append(current_line)
+        return lines
+
+    def _buildTooltipSurface(self, plant_name, current_time):
+        """构建 Tooltip 显示 Surface"""
+        # 创建 Tooltip Surface
+        self.image = pg.Surface((self.TOOLTIP_WIDTH, self.TOOLTIP_HEIGHT), pg.SRCALPHA)
+
+        # 绘制半透明背景（深蓝色调）
+        bg_color = (25, 30, 50, 235)
+        pg.draw.rect(self.image, bg_color, (0, 0, self.TOOLTIP_WIDTH, self.TOOLTIP_HEIGHT),
+                     border_radius=10)
+
+        # 绘制边框（金色）
+        border_color = (255, 200, 50, 255)
+        pg.draw.rect(self.image, border_color, (0, 0, self.TOOLTIP_WIDTH, self.TOOLTIP_HEIGHT),
+                     width=2, border_radius=10)
+
+        # 绘制植物图像和标题
+        self._drawHeader(plant_name)
+
+        # 绘制产品说明
+        self._drawProductDesc(plant_name)
+
+        self.rect = self.image.get_rect()
+
+    def _drawHeader(self, plant_name):
+        """绘制头部：植物图像 + 名称 + 产品名"""
+        # 绘制植物图像（左侧）
+        if self.animation_frames and len(self.animation_frames) > 0:
+            frame = self.animation_frames[self.frame_index % len(self.animation_frames)]
+            frame_rect = frame.get_rect()
+
+            scale_x = self.PLANT_DISPLAY_SIZE / frame_rect.width
+            scale_y = self.PLANT_DISPLAY_SIZE / frame_rect.height
+            scale = min(scale_x, scale_y)
+
+            new_width = int(frame_rect.width * scale)
+            new_height = int(frame_rect.height * scale)
+            scaled_frame = pg.transform.smoothscale(frame, (new_width, new_height))
+
+            img_x = self.PADDING + (self.PLANT_DISPLAY_SIZE - new_width) // 2
+            img_y = self.PADDING + (self.PLANT_DISPLAY_SIZE - new_height) // 2
+            self.image.blit(scaled_frame, (img_x, img_y))
+
+        # 获取文字信息
+        display_name = PLANT_DISPLAY_NAMES.get(plant_name, plant_name)
+        product_name = PLANT_PRODUCT_NAMES.get(plant_name, '')
+
+        # 文字起始位置（图像右侧）
+        text_x = self.PADDING + self.PLANT_DISPLAY_SIZE + 10
+        text_max_width = self.TOOLTIP_WIDTH - text_x - self.PADDING
+
+        try:
+            name_font = pg.font.SysFont('SimHei', 18, bold=True)
+            product_font = pg.font.SysFont('SimHei', 12)
+        except:
+            name_font = pg.font.SysFont(None, 20)
+            product_font = pg.font.SysFont(None, 14)
+
+        # 绘制植物名称（白色，较大）
+        y_offset = self.PADDING + 8
+        name_surface = name_font.render(display_name, True, c.WHITE)
+        self.image.blit(name_surface, (text_x, y_offset))
+        y_offset += name_surface.get_height() + 6
+
+        # 绘制产品名称（金色，自动换行处理长名称）
+        if product_name:
+            # 检查是否需要换行
+            product_lines = self._wrapText(product_name, product_font, text_max_width)
+            for line in product_lines:
+                product_surface = product_font.render(line, True, (255, 215, 100))
+                self.image.blit(product_surface, (text_x, y_offset))
+                y_offset += product_surface.get_height() + 2
+
+    def _drawProductDesc(self, plant_name):
+        """绘制产品说明"""
+        product_desc = PLANT_PRODUCT_DESC.get(plant_name, '')
+        if not product_desc:
+            return
+
+        try:
+            desc_font = pg.font.SysFont('SimHei', 12)
+        except:
+            desc_font = pg.font.SysFont(None, 14)
+
+        # 分隔线位置（在图像下方）
+        line_y = self.PADDING + self.PLANT_DISPLAY_SIZE + 6
+        pg.draw.line(self.image, (80, 85, 110),
+                     (self.PADDING, line_y),
+                     (self.TOOLTIP_WIDTH - self.PADDING, line_y), 1)
+
+        # 绘制说明文字
+        y_offset = line_y + 6
+        max_width = self.TOOLTIP_WIDTH - self.PADDING * 2
+
+        # 文字自动换行
+        desc_lines = self._wrapText(product_desc, desc_font, max_width)
+
+        for line in desc_lines:
+            if y_offset + desc_font.get_height() > self.TOOLTIP_HEIGHT - self.PADDING:
+                break
+            desc_surface = desc_font.render(line, True, (200, 205, 215))
+            self.image.blit(desc_surface, (self.PADDING, y_offset))
+            y_offset += desc_font.get_height() + 1
+
+    def _updatePosition(self, card_rect):
+        """更新 Tooltip 位置，确保不超出屏幕"""
+        if self.rect is None:
+            return
+
+        # 默认显示在卡片右侧
+        x = card_rect.right + 8
+        y = card_rect.top - 20
+
+        # 边界检测 - 右边界，如果超出则显示在卡片左侧
+        if x + self.rect.width > c.SCREEN_WIDTH - 5:
+            x = card_rect.left - self.rect.width - 8
+
+        # 边界检测 - 左边界
+        if x < 5:
+            x = card_rect.centerx - self.rect.width // 2
+            if x < 5:
+                x = 5
+
+        # 边界检测 - 下边界
+        if y + self.rect.height > c.SCREEN_HEIGHT - 5:
+            y = c.SCREEN_HEIGHT - 5 - self.rect.height
+
+        # 边界检测 - 上边界
+        if y < 5:
+            y = 5
+
+        self.rect.x = x
+        self.rect.y = y
+        self.card_rect = card_rect
+
+    def update(self, current_time):
+        """更新动画帧"""
+        if not self.visible or self.animation_frames is None:
+            return
+
+        if current_time - self.animation_timer >= self.ANIMATION_INTERVAL:
+            self.animation_timer = current_time
+            self.frame_index = (self.frame_index + 1) % len(self.animation_frames)
+
+            # 重新绘制
+            plant_name = plant_name_list[self.plant_name_index]
+            self._buildTooltipSurface(plant_name, current_time)
+            if self.card_rect:
+                self._updatePosition(self.card_rect)
+
+    def draw(self, surface):
+        """绘制 Tooltip"""
+        if self.visible and self.image and self.rect:
+            surface.blit(self.image, self.rect)

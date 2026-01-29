@@ -47,7 +47,9 @@ def main():
 
     # 只在主进程中打开浏览器（避免 reloader 重启时重复打开）
     # 主进程的 WERKZEUG_RUN_MAIN 为 None，子进程为 'true'
-    if not werkzeug_run_main:
+    # Docker 环境下不自动打开浏览器
+    is_docker = os.path.exists('/.dockerenv') or os.environ.get('DATABASE_PATH', '').startswith('/app/')
+    if not werkzeug_run_main and not is_docker:
         def open_browser():
             print(f'Opening browser at {url}', flush=True)
             try:

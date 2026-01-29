@@ -140,12 +140,12 @@ class Level(tool.State):
             _, y = self.map.getMapGridPos(0, i)
             self.cars.append(plant.Car(-25, y+20, i))
 
-    def update(self, surface, current_time, mouse_pos, mouse_click, events):
+    def update(self, surface, current_time, mouse_pos, mouse_click, events, mouse_hover_pos=None):
         self.current_time = self.game_info[c.CURRENT_TIME] = current_time
         if self.state == c.CHOOSE:
-            self.choose(mouse_pos, mouse_click)
+            self.choose(mouse_pos, mouse_click, mouse_hover_pos)
         elif self.state == c.PLAY:
-            self.play(mouse_pos, mouse_click)
+            self.play(mouse_pos, mouse_click, mouse_hover_pos)
 
         self.draw(surface)
 
@@ -173,11 +173,12 @@ class Level(tool.State):
         self.state = c.CHOOSE
         self.panel = menubar.Panel(menubar.all_card_list, self.map_data[c.INIT_SUN_NAME])
 
-    def choose(self, mouse_pos, mouse_click):
+    def choose(self, mouse_pos, mouse_click, mouse_hover_pos=None):
         if mouse_pos and mouse_click[0]:
             self.panel.checkCardClick(mouse_pos)
             if self.panel.checkStartButtonClick(mouse_pos):
                 self.initPlay(self.panel.getSelectedCards())
+        self.panel.update(self.current_time, mouse_hover_pos)
 
     def initPlay(self, card_list):
         self.state = c.PLAY
@@ -229,7 +230,7 @@ class Level(tool.State):
         self.setupZombies()
         self.setupCars()
 
-    def play(self, mouse_pos, mouse_click):
+    def play(self, mouse_pos, mouse_click, mouse_hover_pos=None):
         # 僵尸生成逻辑
         if self.zombie_start_time == 0:
             self.zombie_start_time = self.current_time
@@ -289,7 +290,7 @@ class Level(tool.State):
         for car in self.cars:
             car.update(self.game_info)
 
-        self.menubar.update(self.current_time)
+        self.menubar.update(self.current_time, mouse_hover_pos)
 
         self.checkBulletCollisions()
         self.checkZombieCollisions()

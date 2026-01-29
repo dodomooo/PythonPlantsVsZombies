@@ -54,7 +54,7 @@ class Menu(tool.State):
             print(f'[DEBUG] Option clicked at time={self.current_time}')
         return False
         
-    def update(self, surface, current_time, mouse_pos, mouse_click, events):
+    def update(self, surface, current_time, mouse_pos, mouse_click, events, mouse_hover_pos=None):
         self.current_time = self.game_info[c.CURRENT_TIME] = current_time
         
         if not self.option_clicked:

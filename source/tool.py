@@ -38,6 +38,7 @@ class Control():
         self.keys = pg.key.get_pressed()
         self.mouse_pos = None
         self.mouse_click = [False, False]  # value:[left mouse click, right mouse click]
+        self.mouse_hover_pos = None  # 鼠标悬浮位置
         self.current_time = 0.0
         self.state_dict = {}
         self.state_name = None
@@ -56,7 +57,8 @@ class Control():
         self.current_time = pg.time.get_ticks()
         if self.state.done:
             self.flip_state()
-        self.state.update(self.screen, self.current_time, self.mouse_pos, self.mouse_click, self.events)
+        self.state.update(self.screen, self.current_time, self.mouse_pos,
+                          self.mouse_click, self.events, self.mouse_hover_pos)
         self.mouse_pos = None
         self.mouse_click[0] = False
         self.mouse_click[1] = False
@@ -86,6 +88,8 @@ class Control():
                 self.mouse_pos = pg.mouse.get_pos()
                 self.mouse_click[0], _, self.mouse_click[1] = pg.mouse.get_pressed()
                 print('pos:', self.mouse_pos, ' mouse:', self.mouse_click)
+            elif event.type == pg.MOUSEMOTION:
+                self.mouse_hover_pos = pg.mouse.get_pos()
 
     def main(self):
         while not self.done:
@@ -284,5 +288,6 @@ pg.display.set_caption(c.ORIGINAL_CAPTION)
 SCREEN = pg.display.set_mode(c.SCREEN_SIZE, pg.RESIZABLE | pg.SCALED)
 
 GFX = load_all_gfx(os.path.join("resources","graphics"))
+ORIGIN_GFX = load_all_gfx(os.path.join("resources","origin_graphics"))
 ZOMBIE_RECT = loadZombieImageRect()
 PLANT_RECT = loadPlantImageRect()

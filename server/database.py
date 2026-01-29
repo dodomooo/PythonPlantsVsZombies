@@ -5,11 +5,12 @@
 import sqlite3
 import os
 from . import models
+from . import config
 
 
 class Database:
-    def __init__(self, db_path='game.db'):
-        self.db_path = db_path
+    def __init__(self, db_path=None):
+        self.db_path = db_path or config.DATABASE_PATH
         self.init_db()
 
     def get_connection(self):
