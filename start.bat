@@ -91,9 +91,6 @@ start /B "PvZ Server" %PYTHON_CMD% start_server.py > server.log 2>&1
 echo 等待服务器启动...
 timeout /t 3 /nobreak > nul
 
-REM 自动打开排行榜页面
-start "" "http://localhost:5000"
-
 echo [2/2] 正在启动游戏客户端...
 echo.
 echo 提示：关闭游戏窗口后，记得关闭服务器窗口
