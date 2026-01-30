@@ -78,11 +78,11 @@ class LanguageManager:
             'report_no_rank': '未上榜',
 
             # Zombie Names
-            'zombie_normal': '普通僵尸',
-            'zombie_conehead': '锥形头僵尸',
-            'zombie_buckethead': '桶形头僵尸',
-            'zombie_flag': '旗帜僵尸',
-            'zombie_newspaper': '报纸僵尸',
+            'zombie_normal': '木马僵尸',
+            'zombie_conehead': '勒索僵尸',
+            'zombie_buckethead': '银狐僵尸',
+            'zombie_flag': '钓鱼僵尸',
+            'zombie_newspaper': '漏洞僵尸',
 
             # Common
             'seconds': '秒',
@@ -152,11 +152,11 @@ class LanguageManager:
             'report_no_rank': 'Not Ranked',
 
             # Zombie Names
-            'zombie_normal': 'Normal Zombie',
-            'zombie_conehead': 'Conehead Zombie',
-            'zombie_buckethead': 'Buckethead Zombie',
-            'zombie_flag': 'Flag Zombie',
-            'zombie_newspaper': 'Newspaper Zombie',
+            'zombie_normal': 'Trojan Zombie',
+            'zombie_conehead': 'Ransomware Zombie',
+            'zombie_buckethead': 'SilverFox Zombie',
+            'zombie_flag': 'Phishing Zombie',
+            'zombie_newspaper': 'Exploit Zombie',
 
             # Common
             'seconds': 's',
