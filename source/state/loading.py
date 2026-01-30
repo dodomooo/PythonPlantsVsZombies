@@ -47,19 +47,27 @@ class LoadingScreen(tool.State):
             self.start_time = current_time
             self.story_start_time = current_time
 
+        # 检查点击或按键跳过（前 300ms 不响应，防止残留事件立即跳过）
+        if current_time - self.start_time > 300:
+            for event in events:
+                if event.type == pg.MOUSEBUTTONDOWN or event.type == pg.KEYDOWN:
+                    self.done = True
+                    self.next = c.LEVEL
+                    return
+
         # 检查总时长，超过10秒自动跳转
         if current_time - self.start_time >= self.total_duration:
             self.done = True
-            self.next = c.LOGIN_SCREEN
+            self.next = c.LEVEL
             return
 
         # 检查是否需要切换到下一段故事
         if current_time - self.story_start_time >= self.story_duration:
             self.current_story_index += 1
             if self.current_story_index >= len(self.stories):
-                # 所有故事显示完毕，跳转到登录页面
+                # 所有故事显示完毕，跳转到关卡
                 self.done = True
-                self.next = c.LOGIN_SCREEN
+                self.next = c.LEVEL
                 return
             self.story_start_time = current_time
             self.alpha = 0  # 重置透明度
@@ -185,3 +193,14 @@ class LoadingScreen(tool.State):
                 else:
                     # 未显示的故事用灰色空心圆
                     pg.draw.circle(surface, c.WHITE, (dot_x, dot_y), 8, 2)
+
+            # 绘制"点击跳过"提示
+            try:
+                skip_font = pg.font.SysFont('SimHei', 14)
+            except:
+                skip_font = pg.font.SysFont(None, 16)
+            skip_surface = skip_font.render('点击任意位置或按任意键跳过', True, (120, 120, 130))
+            skip_rect = skip_surface.get_rect()
+            skip_rect.centerx = c.SCREEN_WIDTH // 2
+            skip_rect.y = c.SCREEN_HEIGHT - 25
+            surface.blit(skip_surface, skip_rect)

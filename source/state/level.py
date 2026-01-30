@@ -142,6 +142,16 @@ class Level(tool.State):
 
     def update(self, surface, current_time, mouse_pos, mouse_click, events, mouse_hover_pos=None):
         self.current_time = self.game_info[c.CURRENT_TIME] = current_time
+
+        # 检测 ESC 键，重新开始游戏
+        for event in events:
+            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+                if self.drag_plant:
+                    self.removeMouseImage()
+                self.next = c.LOGIN_SCREEN
+                self.done = True
+                return
+
         if self.state == c.CHOOSE:
             self.choose(mouse_pos, mouse_click, mouse_hover_pos)
         elif self.state == c.PLAY:

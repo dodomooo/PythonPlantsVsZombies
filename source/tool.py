@@ -77,9 +77,12 @@ class Control():
 
     def event_loop(self):
         self.events = pg.event.get()  # 获取所有事件
+        # 检查本帧是否有 ESC 按键（ESC 由各状态自行处理，不应触发退出）
+        has_esc = any(e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE for e in self.events)
         for event in self.events:
             if event.type == pg.QUIT:
-                self.done = True
+                if not has_esc:
+                    self.done = True
             elif event.type == pg.KEYDOWN:
                 self.keys = pg.key.get_pressed()
             elif event.type == pg.KEYUP:

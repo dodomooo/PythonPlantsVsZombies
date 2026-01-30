@@ -298,9 +298,9 @@ class LoginScreen(tool.State):
         self.game_info['is_crazy_mode'] = True
         self.game_info[c.LEVEL_NUM] = 'crazy'
 
-        # 直接进入游戏关卡，跳过冒险模式页面
+        # 进入 Loading 页面
         self.done = True
-        self.next = c.LEVEL
+        self.next = c.LOADING_SCREEN
 
     def toggle_language(self):
         """切换语言"""

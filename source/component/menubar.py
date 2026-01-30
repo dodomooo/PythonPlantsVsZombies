@@ -702,7 +702,7 @@ class Tooltip:
     ANIMATION_INTERVAL = 100
     # Tooltip 尺寸
     TOOLTIP_WIDTH = 230
-    TOOLTIP_HEIGHT = 130
+    TOOLTIP_HEIGHT = 95
     # 植物图像显示尺寸
     PLANT_DISPLAY_SIZE = 70
     # 内边距
@@ -799,13 +799,10 @@ class Tooltip:
         # 绘制植物图像和标题
         self._drawHeader(plant_name)
 
-        # 绘制产品说明
-        self._drawProductDesc(plant_name)
-
         self.rect = self.image.get_rect()
 
     def _drawHeader(self, plant_name):
-        """绘制头部：植物图像 + 名称 + 产品名"""
+        """绘制头部：植物图像 + 产品名 + 产品说明（纵向排列）"""
         # 绘制植物图像（左侧）
         if self.animation_frames and len(self.animation_frames) > 0:
             frame = self.animation_frames[self.frame_index % len(self.animation_frames)]
@@ -824,65 +821,40 @@ class Tooltip:
             self.image.blit(scaled_frame, (img_x, img_y))
 
         # 获取文字信息
-        display_name = PLANT_DISPLAY_NAMES.get(plant_name, plant_name)
         product_name = PLANT_PRODUCT_NAMES.get(plant_name, '')
+        product_desc = PLANT_PRODUCT_DESC.get(plant_name, '')
 
         # 文字起始位置（图像右侧）
         text_x = self.PADDING + self.PLANT_DISPLAY_SIZE + 10
         text_max_width = self.TOOLTIP_WIDTH - text_x - self.PADDING
 
         try:
-            name_font = pg.font.SysFont('SimHei', 18, bold=True)
-            product_font = pg.font.SysFont('SimHei', 12)
+            product_font = pg.font.SysFont('SimHei', 16, bold=True)
+            desc_font = pg.font.SysFont('SimHei', 12)
         except:
-            name_font = pg.font.SysFont(None, 20)
-            product_font = pg.font.SysFont(None, 14)
+            product_font = pg.font.SysFont(None, 18)
+            desc_font = pg.font.SysFont(None, 14)
 
-        # 绘制植物名称（白色，较大）
-        y_offset = self.PADDING + 8
-        name_surface = name_font.render(display_name, True, c.WHITE)
-        self.image.blit(name_surface, (text_x, y_offset))
-        y_offset += name_surface.get_height() + 6
+        y_offset = self.PADDING + 10
 
-        # 绘制产品名称（金色，自动换行处理长名称）
+        # 绘制产品名称（金色加粗）
         if product_name:
-            # 检查是否需要换行
             product_lines = self._wrapText(product_name, product_font, text_max_width)
             for line in product_lines:
                 product_surface = product_font.render(line, True, (255, 215, 100))
                 self.image.blit(product_surface, (text_x, y_offset))
-                y_offset += product_surface.get_height() + 2
+                y_offset += product_surface.get_height() + 4
 
-    def _drawProductDesc(self, plant_name):
-        """绘制产品说明"""
-        product_desc = PLANT_PRODUCT_DESC.get(plant_name, '')
-        if not product_desc:
-            return
-
-        try:
-            desc_font = pg.font.SysFont('SimHei', 12)
-        except:
-            desc_font = pg.font.SysFont(None, 14)
-
-        # 分隔线位置（在图像下方）
-        line_y = self.PADDING + self.PLANT_DISPLAY_SIZE + 6
-        pg.draw.line(self.image, (80, 85, 110),
-                     (self.PADDING, line_y),
-                     (self.TOOLTIP_WIDTH - self.PADDING, line_y), 1)
-
-        # 绘制说明文字
-        y_offset = line_y + 6
-        max_width = self.TOOLTIP_WIDTH - self.PADDING * 2
-
-        # 文字自动换行
-        desc_lines = self._wrapText(product_desc, desc_font, max_width)
-
-        for line in desc_lines:
-            if y_offset + desc_font.get_height() > self.TOOLTIP_HEIGHT - self.PADDING:
-                break
-            desc_surface = desc_font.render(line, True, (200, 205, 215))
-            self.image.blit(desc_surface, (self.PADDING, y_offset))
-            y_offset += desc_font.get_height() + 1
+        # 绘制产品说明（浅灰色，紧跟产品名下方）
+        if product_desc:
+            y_offset += 2
+            desc_lines = self._wrapText(product_desc, desc_font, text_max_width)
+            for line in desc_lines:
+                if y_offset + desc_font.get_height() > self.TOOLTIP_HEIGHT - self.PADDING:
+                    break
+                desc_surface = desc_font.render(line, True, (200, 205, 215))
+                self.image.blit(desc_surface, (text_x, y_offset))
+                y_offset += desc_font.get_height() + 2
 
     def _updatePosition(self, card_rect):
         """更新 Tooltip 位置，确保不超出屏幕"""

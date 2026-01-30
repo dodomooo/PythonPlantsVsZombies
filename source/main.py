@@ -13,5 +13,5 @@ def main():
                   c.GAME_LOSE: screen.GameLoseScreen(),
                   c.GAME_REPORT: report.GameReportScreen(),
                   c.LEVEL: level.Level()}
-    game.setup_states(state_dict, c.LOADING_SCREEN)
+    game.setup_states(state_dict, c.LOGIN_SCREEN)
     game.main()
