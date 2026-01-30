@@ -297,14 +297,14 @@ class MenuBar():
         font = pg.font.SysFont('Arial', 24)
         score_text = font.render(f'Score: {score}', True, c.GOLD)
 
-        # 计算文本矩形
+        # 计算文本矩形，放置在右上角
         text_rect = score_text.get_rect()
-        text_rect.x = 550
+        padding_x = 10
+        padding_y = 5
+        text_rect.right = c.SCREEN_WIDTH - padding_x - 5
         text_rect.y = 10
 
         # 绘制半透明背景
-        padding_x = 10
-        padding_y = 5
         bg_rect = pg.Rect(
             text_rect.x - padding_x,
             text_rect.y - padding_y,
@@ -341,14 +341,14 @@ class MenuBar():
         font = pg.font.SysFont('Arial', 24)
         time_text = font.render(f'Time: {minutes:02d}:{seconds:02d}', True, c.WHITE)
 
-        # 计算文本矩形
+        # 计算文本矩形，放置在右上角
         text_rect = time_text.get_rect()
-        text_rect.x = 550
-        text_rect.y = 40
-
-        # 绘制半透明背景
         padding_x = 10
         padding_y = 5
+        text_rect.right = c.SCREEN_WIDTH - padding_x - 5
+        text_rect.y = 45
+
+        # 绘制半透明背景
         bg_rect = pg.Rect(
             text_rect.x - padding_x,
             text_rect.y - padding_y,
@@ -377,14 +377,14 @@ class MenuBar():
         font = pg.font.SysFont('Arial', 24)
         kills_text = font.render(f'Kills: {total_kills}', True, c.WHITE)
 
-        # 计算文本矩形
+        # 计算文本矩形，放置在右上角
         text_rect = kills_text.get_rect()
-        text_rect.x = 550
-        text_rect.y = 70
-
-        # 绘制半透明背景
         padding_x = 10
         padding_y = 5
+        text_rect.right = c.SCREEN_WIDTH - padding_x - 5
+        text_rect.y = 80
+
+        # 绘制半透明背景
         bg_rect = pg.Rect(
             text_rect.x - padding_x,
             text_rect.y - padding_y,
