@@ -406,7 +406,9 @@ class NewspaperZombie(Zombie):
                      losthead_attack_name, die_name, boomdie_name]
 
         for i, name in enumerate(name_list):
-            if name == c.BOOMDIE:
+            # NewspaperZombie 和 NewspaperZombieAttack 是透明背景，使用 BLACK
+            # 其他状态（无报纸、失头、死亡）是白色背景，使用 WHITE
+            if name in [c.NEWSPAPER_ZOMBIE, c.NEWSPAPER_ZOMBIE + 'Attack', c.BOOMDIE]:
                 color = c.BLACK
             else:
                 color = c.WHITE

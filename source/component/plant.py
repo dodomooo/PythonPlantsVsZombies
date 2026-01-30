@@ -405,7 +405,7 @@ class Chomper(Plant):
 
         frame_list = [self.idle_frames, self.attack_frames, self.digest_frames]
         name_list = [idle_name, attack_name, digest_name]
-        scale_list = [1, 1, 1]
+        scale_list = [0.85, 0.85, 0.85]
         rect_list = [(0, 0, 100, 114), None, None]
 
         for i, name in enumerate(name_list):

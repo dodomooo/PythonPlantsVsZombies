@@ -1,9 +1,9 @@
 {
     "zombie_image_rect":{
-        "Zombie":{"x":62, "width":90},
-        "ZombieAttack":{"x":62, "width":90},
-        "ZombieLostHead":{"x":62, "width":90},
-        "ZombieLostHeadAttack":{"x":62, "width":90},
+        "Zombie":{"x":0, "width":166},
+        "ZombieAttack":{"x":0, "width":166},
+        "ZombieLostHead":{"x":0, "width":166},
+        "ZombieLostHeadAttack":{"x":0, "width":166},
         "ZombieDie":{"x":0, "width":164},
         "BoomDie":{"x":68, "width":80},
         "ConeheadZombie":{"x":80, "width":80},
