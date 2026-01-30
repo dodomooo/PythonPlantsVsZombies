@@ -2,7 +2,7 @@ __author__ = 'marble_xu'
 
 START_LEVEL_NUM = 1
 
-ORIGINAL_CAPTION = 'Plant VS Zombies Game'
+ORIGINAL_CAPTION = 'GPT Powered: Security Defense'
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
