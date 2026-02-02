@@ -270,7 +270,7 @@ class SunFlower(Plant):
 
 class PeaShooter(Plant):
     def __init__(self, x, y, bullet_group):
-        Plant.__init__(self, x, y, c.PEASHOOTER, c.PLANT_HEALTH, bullet_group)
+        Plant.__init__(self, x, y, c.PEASHOOTER, c.PLANT_HEALTH, bullet_group, 1.2)
         self.shoot_timer = 0
         
     def attacking(self):
@@ -281,7 +281,7 @@ class PeaShooter(Plant):
 
 class RepeaterPea(Plant):
     def __init__(self, x, y, bullet_group):
-        Plant.__init__(self, x, y, c.REPEATERPEA, c.PLANT_HEALTH, bullet_group)
+        Plant.__init__(self, x, y, c.REPEATERPEA, c.PLANT_HEALTH, bullet_group, 1.25)
         self.shoot_timer = 0
 
     def attacking(self):
