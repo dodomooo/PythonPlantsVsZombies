@@ -270,7 +270,7 @@ class SunFlower(Plant):
 
 class PeaShooter(Plant):
     def __init__(self, x, y, bullet_group):
-        Plant.__init__(self, x, y, c.PEASHOOTER, c.PLANT_HEALTH, bullet_group)
+        Plant.__init__(self, x, y, c.PEASHOOTER, c.PLANT_HEALTH, bullet_group, 1.2)
         self.shoot_timer = 0
         
     def attacking(self):
@@ -281,7 +281,7 @@ class PeaShooter(Plant):
 
 class RepeaterPea(Plant):
     def __init__(self, x, y, bullet_group):
-        Plant.__init__(self, x, y, c.REPEATERPEA, c.PLANT_HEALTH, bullet_group)
+        Plant.__init__(self, x, y, c.REPEATERPEA, c.PLANT_HEALTH, bullet_group, 1.25)
         self.shoot_timer = 0
 
     def attacking(self):
@@ -548,7 +548,7 @@ class Squash(Plant):
         name_list = [idle_name, aim_name, attack_name]
 
         for i, name in enumerate(name_list):
-            self.loadFrames(frame_list[i], name, 0.75)  # idle 用黑色（透明背景）
+            self.loadFrames(frame_list[i], name, 0.5) 
 
 
         self.frames = self.idle_frames

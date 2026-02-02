@@ -433,7 +433,7 @@ class Level(tool.State):
 
         # 为倭瓜和食人花设置缩放比例
         if plant_name == c.SQUASH:
-            scale = 0.75
+            scale = 0.5
         elif plant_name == c.CHOMPER:
             scale = 0.85
         else:
