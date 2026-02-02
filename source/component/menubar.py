@@ -22,11 +22,20 @@ ZOMBIE_WALK_FRAMES = {
 
 # 僵尸中文名称映射
 ZOMBIE_DISPLAY_NAMES = {
-    c.NORMAL_ZOMBIE: '普通僵尸',
-    c.CONEHEAD_ZOMBIE: '路障僵尸',
-    c.BUCKETHEAD_ZOMBIE: '铁桶僵尸',
-    c.FLAG_ZOMBIE: '旗帜僵尸',
-    c.NEWSPAPER_ZOMBIE: '报纸僵尸',
+    c.NORMAL_ZOMBIE: '木马僵尸',
+    c.CONEHEAD_ZOMBIE: '蠕虫僵尸',
+    c.BUCKETHEAD_ZOMBIE: '勒索僵尸',
+    c.FLAG_ZOMBIE: '钓鱼僵尸',
+    c.NEWSPAPER_ZOMBIE: '间谍僵尸',
+}
+
+# 僵尸图片水平偏移量（用于居中校正）
+ZOMBIE_X_OFFSET = {
+    c.NORMAL_ZOMBIE: -15,
+    c.CONEHEAD_ZOMBIE: -20,
+    c.BUCKETHEAD_ZOMBIE: -15,
+    c.FLAG_ZOMBIE: -10,
+    c.NEWSPAPER_ZOMBIE: 10,
 }
 
 # 植物中文名称映射
@@ -510,19 +519,14 @@ class MenuBar():
 
 class Panel():
     def __init__(self, card_list, sun_value, zombie_types=None):
-        import time
-        t0 = time.time()
         self.loadImages(sun_value)
-        t1 = time.time()
         self.selected_cards = []
         self.selected_num = 0
         self.setupCards(card_list)
-        t2 = time.time()
         self.tooltip = Tooltip()
         # 僵尸预览相关
         self.zombie_types = zombie_types or []
         self.setupZombiePreview()
-        print(f'[DEBUG] Panel.__init__: loadImages={t1-t0:.3f}s, setupCards={t2-t1:.3f}s')
 
     def loadFrame(self, name):
         frame = tool.GFX[name]
@@ -719,11 +723,11 @@ class Panel():
         surface.blit(title_text, title_rect)
 
         # 僵尸图像显示尺寸和布局
-        zombie_display_size = c.scale(80)
-        cols = 3
-        spacing_x = c.scale(105)
-        spacing_y = c.scale(110)
-        start_x = preview_x + c.scale(25)
+        zombie_display_size = c.scale(95)
+        cols = 2
+        spacing_x = c.scale(155)
+        spacing_y = c.scale(130)
+        start_x = preview_x + c.scale(20)
         start_y = preview_y + c.scale(50)
 
         try:
@@ -749,14 +753,15 @@ class Panel():
             # 缩放以适配显示区域
             scale_x = zombie_display_size / frame_rect.width
             scale_y = zombie_display_size / frame_rect.height
-            scale = min(scale_x, scale_y) * 0.9
+            scale = min(scale_x, scale_y)
 
             new_width = int(frame_rect.width * scale)
             new_height = int(frame_rect.height * scale)
             scaled_frame = pg.transform.smoothscale(frame, (new_width, new_height))
 
-            # 居中显示
-            img_x = x + (zombie_display_size - new_width) // 2
+            # 居中显示（应用偏移量校正）
+            x_offset = c.scale(ZOMBIE_X_OFFSET.get(zombie_name, 0))
+            img_x = x + (zombie_display_size - new_width) // 2 + x_offset
             img_y = y + (zombie_display_size - new_height) // 2
             surface.blit(scaled_frame, (img_x, img_y))
 

@@ -190,8 +190,14 @@ class Level(tool.State):
         self.state = c.CHOOSE
         # 从关卡数据中提取僵尸类型列表
         zombie_types = []
+        # 首先尝试从 zombie_list 获取
         for data in self.map_data.get(c.ZOMBIE_LIST, []):
             zombie_types.append(data['name'])
+        # 如果 zombie_list 为空，尝试从 zombie_spawn_config 获取
+        if not zombie_types:
+            spawn_config = self.map_data.get('zombie_spawn_config', {})
+            spawn_prob = spawn_config.get('spawn_probability', {})
+            zombie_types = list(spawn_prob.keys())
         self.panel = menubar.Panel(menubar.all_card_list, self.map_data[c.INIT_SUN_NAME], zombie_types)
 
     def choose(self, mouse_pos, mouse_click, mouse_hover_pos=None):
