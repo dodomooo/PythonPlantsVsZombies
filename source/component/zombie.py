@@ -39,7 +39,7 @@ class Zombie(pg.sprite.Sprite):
         self.freeze_timer = 0
         self.is_hypno = False # the zombie is hypo and attack other zombies when it ate a HypnoShroom
     
-    def loadFrames(self, frames, name, image_x, colorkey=c.BLACK):
+    def loadFrames(self, frames, name, image_x, colorkey=c.BLACK, scale=1):
         frame_list = tool.GFX[name]
 
         for frame in frame_list:
@@ -434,6 +434,13 @@ class NewspaperZombie(Zombie):
                 color = c.BLACK
             else:
                 color = c.WHITE
-            self.loadFrames(frame_list[i], name, tool.ZOMBIE_RECT[name]['x'], color)
+
+            # 带报纸的状态缩放为 0.85
+            if name in [c.NEWSPAPER_ZOMBIE, c.NEWSPAPER_ZOMBIE + 'Attack']:
+                scale = 0.85
+            else:
+                scale = 1
+
+            self.loadFrames(frame_list[i], name, tool.ZOMBIE_RECT[name]['x'], color, scale)
 
         self.frames = self.helmet_walk_frames

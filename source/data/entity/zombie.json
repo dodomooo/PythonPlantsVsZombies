@@ -14,12 +14,12 @@
         "FlagZombieAttack":{"x":0, "width":166},
         "FlagZombieLostHead":{"x":0, "width":166},
         "FlagZombieLostHeadAttack":{"x":0, "width":166},
-        "NewspaperZombie":{"x":48, "width":92},
-        "NewspaperZombieAttack":{"x":48, "width":92},
-        "NewspaperZombieNoPaper":{"x":40, "width":98},
-        "NewspaperZombieNoPaperAttack":{"x":48, "width":92},
-        "NewspaperZombieLostHead":{"x":44, "width":96},
-        "NewspaperZombieLostHeadAttack":{"x":48, "width":92},
+        "NewspaperZombie":{"x":0, "width":140},
+        "NewspaperZombieAttack":{"x":0, "width":140},
+        "NewspaperZombieNoPaper":{"x":0, "width":140},
+        "NewspaperZombieNoPaperAttack":{"x":0, "width":140},
+        "NewspaperZombieLostHead":{"x":0, "width":140},
+        "NewspaperZombieLostHeadAttack":{"x":0, "width":140},
         "NewspaperZombieDie":{"x":0, "width":100}
     }
 }
