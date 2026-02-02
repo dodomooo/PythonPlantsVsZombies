@@ -99,10 +99,13 @@ all_card_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 def getSunValueImage(sun_value):
     font = pg.font.SysFont(None, c.scale(22))
-    width = c.scale(32)
+    min_width = c.scale(32)
     msg_image = font.render(str(sun_value), True, c.NAVYBLUE, c.LIGHTYELLOW)
     msg_rect = msg_image.get_rect()
     msg_w = msg_rect.width
+
+    # 动态计算宽度，确保能容纳所有位数
+    width = max(min_width, msg_w + c.scale(2))
 
     image = pg.Surface([width, c.scale(17)])
     x = width - msg_w
@@ -472,10 +475,18 @@ class MenuBar():
         text_surface = font.render(text, True, (255, 255, 255))
         text_rect = text_surface.get_rect()
 
+        # 确保与植物栏有足够间距：最小左边界为菜单栏右边界 + 间距
+        min_left_x = self.rect.right + c.scale(30)
+
         if right_margin is not None:
-            text_rect.right = right_margin - c.scale(20)
+            text_rect.right = right_margin - c.scale(40)
         else:
-            text_rect.right = c.SCREEN_WIDTH - c.scale(25)
+            text_rect.right = c.SCREEN_WIDTH - c.scale(40)
+
+        # 如果文字左边界太靠近植物栏，则右移
+        if text_rect.x < min_left_x:
+            text_rect.x = min_left_x
+
         text_rect.y = c.scale(15)
 
         # 绘制多层描边实现立体效果
@@ -925,10 +936,18 @@ class MoveBar():
         text_surface = font.render(text, True, (255, 255, 255))
         text_rect = text_surface.get_rect()
 
+        # 确保与植物栏有足够间距：最小左边界为菜单栏右边界 + 间距
+        min_left_x = self.rect.right + c.scale(30)
+
         if right_margin is not None:
-            text_rect.right = right_margin - c.scale(20)
+            text_rect.right = right_margin - c.scale(40)
         else:
-            text_rect.right = c.SCREEN_WIDTH - c.scale(25)
+            text_rect.right = c.SCREEN_WIDTH - c.scale(40)
+
+        # 如果文字左边界太靠近植物栏，则右移
+        if text_rect.x < min_left_x:
+            text_rect.x = min_left_x
+
         text_rect.y = c.scale(15)
 
         # 外层阴影
