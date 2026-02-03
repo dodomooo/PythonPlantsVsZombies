@@ -242,6 +242,8 @@ class MenuBar():
         frame_rect = (rect.x, rect.y, rect.w, rect.h)
 
         self.image = tool.get_image(tool.GFX[name], *frame_rect, c.WHITE, 1)
+        # 保存原始背景副本，用于清除阳光值显示区域
+        self.orig_image = self.image.copy()
 
     def update(self, current_time, mouse_hover_pos=None):
         self.current_time = current_time
@@ -319,6 +321,11 @@ class MenuBar():
         self.value_rect = self.value_image.get_rect()
         self.value_rect.x = c.scale(21)
         self.value_rect.y = self.rect.bottom - c.scale(21)
+
+        # 先用原始背景清除阳光值显示区域（使用较大的固定宽度确保完全清除）
+        clear_width = c.scale(50)
+        clear_rect = pg.Rect(self.value_rect.x, self.value_rect.y, clear_width, self.value_rect.height)
+        self.image.blit(self.orig_image, clear_rect, clear_rect)
 
         self.image.blit(self.value_image, self.value_rect)
 
