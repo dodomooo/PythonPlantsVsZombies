@@ -23,10 +23,10 @@ ZOMBIE_WALK_FRAMES = {
 # 僵尸中文名称映射
 ZOMBIE_DISPLAY_NAMES = {
     c.NORMAL_ZOMBIE: '木马僵尸',
-    c.CONEHEAD_ZOMBIE: '蠕虫僵尸',
-    c.BUCKETHEAD_ZOMBIE: '勒索僵尸',
+    c.CONEHEAD_ZOMBIE: '勒索僵尸',
+    c.BUCKETHEAD_ZOMBIE: '银狐僵尸',
     c.FLAG_ZOMBIE: '钓鱼僵尸',
-    c.NEWSPAPER_ZOMBIE: '间谍僵尸',
+    c.NEWSPAPER_ZOMBIE: '漏洞僵尸',
 }
 
 # 僵尸图片水平偏移量（用于居中校正）
