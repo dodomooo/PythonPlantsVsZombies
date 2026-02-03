@@ -371,7 +371,7 @@ class ThreePeaShooter(Plant):
                     continue
                 dest_y = self.rect.y + (i - 1) * c.GRID_Y_SIZE + offset_y
                 self.bullet_groups[tmp_y].add(Bullet(self.rect.right, self.rect.y, dest_y,
-                                        c.BULLET_PEA, c.BULLET_DAMAGE_NORMAL, False))
+                                        c.BULLET_PEA_THREE, c.BULLET_DAMAGE_NORMAL, False))
             self.shoot_timer = self.current_time
 
 class SnowPeaShooter(Plant):

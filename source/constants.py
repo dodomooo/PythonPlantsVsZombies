@@ -177,6 +177,7 @@ CARD_REDWALLNUT = 'card_redwallnut'
 #BULLET INFO
 BULLET_PEA = 'PeaNormal'
 BULLET_PEA_ICE = 'PeaIce'
+BULLET_PEA_THREE = 'PeaThree'
 BULLET_MUSHROOM = 'BulletMushRoom'
 BULLET_DAMAGE_NORMAL = 1
 
