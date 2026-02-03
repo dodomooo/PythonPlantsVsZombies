@@ -62,11 +62,35 @@ class Bullet(pg.sprite.Sprite):
             x, y, width, height = data['x'], data['y'], data['width'], data['height']
         else:
             x, y = 0, 0
-            rect = frame_list[0].get_rect()
-            width, height = rect.w, rect.h
-        
+            min_w = min(f.get_rect().w for f in frame_list)
+            min_h = min(f.get_rect().h for f in frame_list)
+            width, height = min_w, min_h
+
+        expected_w = x + width
+        expected_h = y + height
+
         for frame in frame_list:
-            frames.append(tool.get_image(frame, x, y, width, height))
+            actual_rect = frame.get_rect()
+            actual_w, actual_h = actual_rect.w, actual_rect.h
+
+            is_hd = (actual_w > expected_w * 2 or actual_h > expected_h * 2)
+
+            if is_hd:
+                hd_ratio = actual_w / expected_w if expected_w > 0 else 1
+                scaled_x = int(x * hd_ratio)
+                scaled_y = int(y * hd_ratio)
+                crop_width = int(width * hd_ratio)
+                crop_height = int(height * hd_ratio)
+
+                target_width = int(width * c.ASSET_SCALE)
+                target_height = int(height * c.ASSET_SCALE)
+
+                frames.append(tool.get_image_fit(
+                    frame, scaled_x, scaled_y, crop_width, crop_height,
+                    target_width=target_width, target_height=target_height
+                ))
+            else:
+                frames.append(tool.get_image(frame, x, y, width, height))
     
     def load_images(self):
         self.fly_frames = []
@@ -135,11 +159,38 @@ class Plant(pg.sprite.Sprite):
             x, y, width, height = data['x'], data['y'], data['width'], data['height']
         else:
             x, y = 0, 0
-            rect = frame_list[0].get_rect()
-            width, height = rect.w, rect.h
+            # 使用最小帧尺寸作为基准，避免高清帧干扰
+            min_w = min(f.get_rect().w for f in frame_list)
+            min_h = min(f.get_rect().h for f in frame_list)
+            width, height = min_w, min_h
+
+        # 预计算期望的原始图片总尺寸（用于高清检测）
+        expected_w = x + width
+        expected_h = y + height
 
         for frame in frame_list:
-            frames.append(tool.get_image(frame, x, y, width, height, color, scale))
+            actual_rect = frame.get_rect()
+            actual_w, actual_h = actual_rect.w, actual_rect.h
+
+            # 检测是否为高清图片（实际尺寸超过期望的 2 倍）
+            is_hd = (actual_w > expected_w * 2 or actual_h > expected_h * 2)
+
+            if is_hd:
+                hd_ratio = actual_w / expected_w if expected_w > 0 else 1
+                scaled_x = int(x * hd_ratio)
+                scaled_y = int(y * hd_ratio)
+                crop_width = int(width * hd_ratio)
+                crop_height = int(height * hd_ratio)
+
+                target_width = int(width * scale * c.ASSET_SCALE)
+                target_height = int(height * scale * c.ASSET_SCALE)
+
+                frames.append(tool.get_image_fit(
+                    frame, scaled_x, scaled_y, crop_width, crop_height, color,
+                    target_width=target_width, target_height=target_height
+                ))
+            else:
+                frames.append(tool.get_image(frame, x, y, width, height, color, scale))
 
     def loadImages(self, name, scale):
         self.loadFrames(self.frames, name, scale)

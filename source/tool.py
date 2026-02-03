@@ -184,7 +184,7 @@ def load_image_frames(directory, image_name, colorkey, accept):
             tmp[index]= img
             frame_num += 1
 
-    for i in range(frame_num):
+    for i in range(len(tmp)):
         frame_list.append(tmp[i])
     return frame_list
 
