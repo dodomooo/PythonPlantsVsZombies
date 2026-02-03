@@ -64,6 +64,37 @@ PLANT_DISPLAY_NAMES = {
     c.JALAPENO: '火爆辣椒',
 }
 
+# 植物常量到翻译键的映射
+PLANT_NAME_LANG_KEYS = {
+    c.SUNFLOWER: 'plant_name_sunflower',
+    c.PEASHOOTER: 'plant_name_peashooter',
+    c.SNOWPEASHOOTER: 'plant_name_snowpeashooter',
+    c.WALLNUT: 'plant_name_wallnut',
+    c.CHERRYBOMB: 'plant_name_cherrybomb',
+    c.THREEPEASHOOTER: 'plant_name_threepeashooter',
+    c.REPEATERPEA: 'plant_name_repeaterpea',
+    c.CHOMPER: 'plant_name_chomper',
+    c.POTATOMINE: 'plant_name_potatomine',
+    c.SQUASH: 'plant_name_squash',
+    c.SPIKEWEED: 'plant_name_spikeweed',
+    c.JALAPENO: 'plant_name_jalapeno',
+}
+
+PLANT_DESC_LANG_KEYS = {
+    c.SUNFLOWER: 'plant_desc_sunflower',
+    c.PEASHOOTER: 'plant_desc_peashooter',
+    c.SNOWPEASHOOTER: 'plant_desc_snowpeashooter',
+    c.WALLNUT: 'plant_desc_wallnut',
+    c.CHERRYBOMB: 'plant_desc_cherrybomb',
+    c.THREEPEASHOOTER: 'plant_desc_threepeashooter',
+    c.REPEATERPEA: 'plant_desc_repeaterpea',
+    c.CHOMPER: 'plant_desc_chomper',
+    c.POTATOMINE: 'plant_desc_potatomine',
+    c.SQUASH: 'plant_desc_squash',
+    c.SPIKEWEED: 'plant_desc_spikeweed',
+    c.JALAPENO: 'plant_desc_jalapeno',
+}
+
 # 植物对应的 Sangfor 产品名称
 PLANT_PRODUCT_NAMES = {
     c.SUNFLOWER: 'SecGPT',
@@ -1006,7 +1037,7 @@ class Tooltip:
     TOOLTIP_WIDTH = c.scale(320)
     TOOLTIP_HEIGHT = c.scale(110)
     # 左侧区域宽度
-    LEFT_AREA_WIDTH = c.scale(200)
+    LEFT_AREA_WIDTH = c.scale(155)
     # 植物图像显示尺寸
     PLANT_DISPLAY_SIZE = c.scale(65)
     # 内边距
@@ -1106,7 +1137,7 @@ class Tooltip:
         self.rect = self.image.get_rect()
 
     def _drawHeader(self, plant_name):
-        """绘制左右布局：左侧（植物图像+产品名+介绍），右侧（参照原型+植物名称）"""
+        """绘制左中右布局：左侧（产品名+介绍），中间（参照原型+植物名称），右侧（植物图像）"""
         # 字体
         try:
             product_font = pg.font.SysFont('SimHei', c.scale(14), bold=True)
@@ -1119,34 +1150,15 @@ class Tooltip:
             label_font = pg.font.SysFont(None, c.scale(13))
             plant_name_font = pg.font.SysFont(None, c.scale(16))
 
-        # ========== 左侧区域 ==========
-        # 绘制植物图像（左上角）
-        img_x = self.PADDING
-        img_y = self.PADDING
-        if self.animation_frames and len(self.animation_frames) > 0:
-            frame = self.animation_frames[self.frame_index % len(self.animation_frames)]
-            frame_rect = frame.get_rect()
-
-            scale_x = self.PLANT_DISPLAY_SIZE / frame_rect.width
-            scale_y = self.PLANT_DISPLAY_SIZE / frame_rect.height
-            scale = min(scale_x, scale_y)
-
-            new_width = int(frame_rect.width * scale)
-            new_height = int(frame_rect.height * scale)
-            scaled_frame = pg.transform.smoothscale(frame, (new_width, new_height))
-
-            img_draw_x = img_x + (self.PLANT_DISPLAY_SIZE - new_width) // 2
-            img_draw_y = img_y + (self.PLANT_DISPLAY_SIZE - new_height) // 2
-            self.image.blit(scaled_frame, (img_draw_x, img_draw_y))
-
-        # 文字区域（植物图像右侧）
-        text_x = img_x + self.PLANT_DISPLAY_SIZE + c.scale(8)
-        text_max_width = self.LEFT_AREA_WIDTH - self.PLANT_DISPLAY_SIZE - c.scale(18)
+        # ========== 左侧区域（产品名+介绍）==========
+        text_x = self.PADDING
+        text_max_width = self.LEFT_AREA_WIDTH - self.PADDING - c.scale(10)
         y_offset = self.PADDING + c.scale(2)
 
         # 获取文字信息
         product_name = PLANT_PRODUCT_NAMES.get(plant_name, '')
-        product_desc = PLANT_PRODUCT_DESC.get(plant_name, '')
+        desc_lang_key = PLANT_DESC_LANG_KEYS.get(plant_name)
+        product_desc = LANG.get(desc_lang_key) if desc_lang_key else ''
 
         # 绘制产品名称（金色加粗）
         if product_name:
@@ -1167,31 +1179,58 @@ class Tooltip:
                 self.image.blit(desc_surface, (text_x, y_offset))
                 y_offset += desc_font.get_height() + c.scale(2)
 
-        # ========== 分隔线 ==========
+        # ========== 第一条分隔线 ==========
         separator_x = self.LEFT_AREA_WIDTH
         pg.draw.line(self.image, (100, 110, 130, 180),
                      (separator_x, self.PADDING + c.scale(5)),
                      (separator_x, self.TOOLTIP_HEIGHT - self.PADDING - c.scale(5)),
                      width=c.scale(1))
 
-        # ========== 右侧区域 ==========
-        right_x = self.LEFT_AREA_WIDTH + c.scale(12)
-        right_width = self.TOOLTIP_WIDTH - self.LEFT_AREA_WIDTH - self.PADDING - c.scale(12)
+        # ========== 中间区域（参照原型+植物名称）==========
+        middle_x = self.LEFT_AREA_WIDTH + c.scale(12)
+        middle_width = self.TOOLTIP_WIDTH - self.LEFT_AREA_WIDTH - self.PLANT_DISPLAY_SIZE - self.PADDING - c.scale(24)
 
         # "参照原型" 标签（顶端对齐）
-        label_text = '参照原型'
+        label_text = LANG.get('plant_tooltip_prototype')
         label_surface = label_font.render(label_text, True, (150, 160, 180))
         label_y = self.PADDING + c.scale(2)
-        self.image.blit(label_surface, (right_x, label_y))
+        self.image.blit(label_surface, (middle_x, label_y))
 
-        # 植物中文名称
-        display_name = PLANT_DISPLAY_NAMES.get(plant_name, plant_name)
-        name_lines = self._wrapText(display_name, plant_name_font, right_width)
+        # 植物名称
+        name_lang_key = PLANT_NAME_LANG_KEYS.get(plant_name)
+        display_name = LANG.get(name_lang_key) if name_lang_key else plant_name
+        name_lines = self._wrapText(display_name, plant_name_font, middle_width)
         name_y = label_y + label_surface.get_height() + c.scale(6)
         for line in name_lines:
             name_surface = plant_name_font.render(line, True, (120, 220, 120))
-            self.image.blit(name_surface, (right_x, name_y))
+            self.image.blit(name_surface, (middle_x, name_y))
             name_y += name_surface.get_height() + c.scale(2)
+
+        # ========== 第二条分隔线 ==========
+        separator2_x = self.TOOLTIP_WIDTH - self.PLANT_DISPLAY_SIZE - self.PADDING - c.scale(5)
+        pg.draw.line(self.image, (100, 110, 130, 180),
+                     (separator2_x, self.PADDING + c.scale(5)),
+                     (separator2_x, self.TOOLTIP_HEIGHT - self.PADDING - c.scale(5)),
+                     width=c.scale(1))
+
+        # ========== 右侧区域（植物图像）==========
+        img_x = self.TOOLTIP_WIDTH - self.PADDING - self.PLANT_DISPLAY_SIZE
+        img_y = (self.TOOLTIP_HEIGHT - self.PLANT_DISPLAY_SIZE) // 2  # 垂直居中
+        if self.animation_frames and len(self.animation_frames) > 0:
+            frame = self.animation_frames[self.frame_index % len(self.animation_frames)]
+            frame_rect = frame.get_rect()
+
+            scale_x = self.PLANT_DISPLAY_SIZE / frame_rect.width
+            scale_y = self.PLANT_DISPLAY_SIZE / frame_rect.height
+            scale = min(scale_x, scale_y)
+
+            new_width = int(frame_rect.width * scale)
+            new_height = int(frame_rect.height * scale)
+            scaled_frame = pg.transform.smoothscale(frame, (new_width, new_height))
+
+            img_draw_x = img_x + (self.PLANT_DISPLAY_SIZE - new_width) // 2
+            img_draw_y = img_y + (self.PLANT_DISPLAY_SIZE - new_height) // 2
+            self.image.blit(scaled_frame, (img_draw_x, img_draw_y))
 
     def _updatePosition(self, card_rect):
         """更新 Tooltip 位置，确保不超出屏幕"""
