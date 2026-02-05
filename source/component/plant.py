@@ -71,6 +71,9 @@ class Bullet(pg.sprite.Sprite):
         expected_w = x + width
         expected_h = y + height
 
+        # 爆炸效果使用 SRCALPHA 处理透明度，不使用 colorkey
+        use_alpha = 'Explode' in name
+
         for frame in frame_list:
             actual_rect = frame.get_rect()
             actual_w, actual_h = actual_rect.w, actual_rect.h
@@ -89,10 +92,12 @@ class Bullet(pg.sprite.Sprite):
 
                 frames.append(tool.get_image_fit(
                     frame, scaled_x, scaled_y, crop_width, crop_height,
+                    None if use_alpha else c.BLACK,
                     target_width=target_width, target_height=target_height
                 ))
             else:
-                frames.append(tool.get_image(frame, x, y, width, height))
+                frames.append(tool.get_image(frame, x, y, width, height,
+                                            None if use_alpha else c.BLACK))
     
     def load_images(self):
         cached = Bullet._FRAME_CACHE.get(self.name)
@@ -109,6 +114,8 @@ class Bullet(pg.sprite.Sprite):
             explode_name = 'BulletMushRoomExplode'
         elif self.name == c.BULLET_PEA_THREE:
             explode_name = 'PeaThreeExplode'
+        elif self.name == c.BULLET_PEA_ICE:
+            explode_name = 'PeaIceExplode'
         else:
             explode_name = 'PeaNormalExplode'
 
@@ -181,6 +188,12 @@ class Plant(pg.sprite.Sprite):
         expected_w = x + width
         expected_h = y + height
 
+        # 太阳和爆炸效果使用 SRCALPHA 处理透明度，不使用 colorkey
+        # 注意：JalapenoExplode 需要用白色作为 colorkey，所以排除
+        use_alpha = (name == c.SUN or
+                    (('Explode' in name) and ('Jalapeno' not in name)) or
+                    name == c.CHERRY_BOOM_IMAGE)
+
         for frame in frame_list:
             actual_rect = frame.get_rect()
             actual_w, actual_h = actual_rect.w, actual_rect.h
@@ -199,11 +212,13 @@ class Plant(pg.sprite.Sprite):
                 target_height = int(height * scale * c.ASSET_SCALE)
 
                 frames.append(tool.get_image_fit(
-                    frame, scaled_x, scaled_y, crop_width, crop_height, color,
+                    frame, scaled_x, scaled_y, crop_width, crop_height,
+                    None if use_alpha else color,
                     target_width=target_width, target_height=target_height
                 ))
             else:
-                frames.append(tool.get_image(frame, x, y, width, height, color, scale))
+                frames.append(tool.get_image(frame, x, y, width, height,
+                                            None if use_alpha else color, scale))
 
     def loadImages(self, name, scale):
         self.loadFrames(self.frames, name, scale)
@@ -286,10 +301,10 @@ class Plant(pg.sprite.Sprite):
 class Sun(Plant):
     def __init__(self, x, y, dest_x, dest_y, is_big=True):
         if is_big:
-            scale = 0.9
+            scale = 1
             self.sun_value = c.SUN_VALUE
         else:
-            scale = 0.6
+            scale = 0.7
             self.sun_value = 12
         Plant.__init__(self, x, y, c.SUN, 0, None, scale)
         self.move_speed = c.scale(1)
@@ -322,7 +337,7 @@ class Sun(Plant):
 
 class SunFlower(Plant):
     def __init__(self, x, y, sun_group):
-        Plant.__init__(self, x, y, c.SUNFLOWER, c.PLANT_HEALTH, None, 0.75)
+        Plant.__init__(self, x, y, c.SUNFLOWER, c.PLANT_HEALTH, None, 0.88)
         self.sun_timer = 0
         self.sun_group = sun_group
     
@@ -346,7 +361,9 @@ class PeaShooter(Plant):
 
 class RepeaterPea(Plant):
     def __init__(self, x, y, bullet_group):
-        Plant.__init__(self, x, y, c.REPEATERPEA, c.PLANT_HEALTH, bullet_group, 1)
+        Plant.__init__(self, x, y, c.REPEATERPEA, c.PLANT_HEALTH, bullet_group, 1.1)
+        # 调整双发射手位置，使其更居中
+        self.rect.bottom = y + c.scale(8)
         self.shoot_timer = 0
 
     def attacking(self):
@@ -359,7 +376,7 @@ class RepeaterPea(Plant):
 
 class ThreePeaShooter(Plant):
     def __init__(self, x, y, bullet_groups, map_y):
-        Plant.__init__(self, x, y, c.THREEPEASHOOTER, c.PLANT_HEALTH, None, 0.75)
+        Plant.__init__(self, x, y, c.THREEPEASHOOTER, c.PLANT_HEALTH, None, 0.85)
         self.shoot_timer = 0
         self.map_y = map_y
         self.bullet_groups = bullet_groups
@@ -378,7 +395,7 @@ class ThreePeaShooter(Plant):
 
 class SnowPeaShooter(Plant):
     def __init__(self, x, y, bullet_group):
-        Plant.__init__(self, x, y, c.SNOWPEASHOOTER, c.PLANT_HEALTH, bullet_group, 0.85)
+        Plant.__init__(self, x, y, c.SNOWPEASHOOTER, c.PLANT_HEALTH, bullet_group, 0.95)
         self.shoot_timer = 0
 
     def attacking(self):
@@ -389,7 +406,9 @@ class SnowPeaShooter(Plant):
 
 class WallNut(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.WALLNUT, c.WALLNUT_HEALTH, None, 1)
+        Plant.__init__(self, x, y, c.WALLNUT, c.WALLNUT_HEALTH, None, 1.1)
+        # 调整坚果位置，使其更居中
+        self.rect.bottom = y + c.scale(8)
         self.load_images()
         self.cracked1 = False
         self.cracked2 = False
@@ -397,12 +416,12 @@ class WallNut(Plant):
     def load_images(self):
         self.cracked1_frames = []
         self.cracked2_frames = []
-        
+
         cracked1_frames_name = self.name + '_cracked1'
         cracked2_frames_name = self.name + '_cracked2'
 
-        self.loadFrames(self.cracked1_frames, cracked1_frames_name, 1)
-        self.loadFrames(self.cracked2_frames, cracked2_frames_name, 1)
+        self.loadFrames(self.cracked1_frames, cracked1_frames_name, 1.1)
+        self.loadFrames(self.cracked2_frames, cracked2_frames_name, 1.1)
     
     def idling(self):
         if not self.cracked1 and self.health <= c.WALLNUT_CRACKED1_HEALTH:
@@ -414,7 +433,7 @@ class WallNut(Plant):
 
 class CherryBomb(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.CHERRYBOMB, c.WALLNUT_HEALTH, None, 0.75)
+        Plant.__init__(self, x, y, c.CHERRYBOMB, c.WALLNUT_HEALTH, None, 0.85)
         self.state = c.ATTACK
         self.start_boom = False
         self.bomb_timer = 0
@@ -425,9 +444,9 @@ class CherryBomb(Plant):
         frame = tool.GFX[c.CHERRY_BOOM_IMAGE]
         rect = frame.get_rect()
         width, height = rect.w, rect.h
-                
+
         old_rect = self.rect
-        image = tool.get_image(frame, 0, 0, width, height, c.BLACK, 0.75)
+        image = tool.get_image(frame, 0, 0, width, height, c.BLACK, 0.85)
         self.image = image
         self.rect = image.get_rect()
         self.rect.centerx = old_rect.centerx
@@ -452,7 +471,10 @@ class CherryBomb(Plant):
 
 class Chomper(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.CHOMPER, c.PLANT_HEALTH, None, 0.65)
+        Plant.__init__(self, x, y, c.CHOMPER, c.PLANT_HEALTH, None, 0.85)
+        # 调整食人花位置，使其更居中（向左下偏移）
+        self.rect.centerx = x - c.scale(5)
+        self.rect.bottom = y + c.scale(15)
         self.animate_interval = 250
         self.digest_timer = 0
         self.digest_interval = 15000
@@ -470,7 +492,7 @@ class Chomper(Plant):
 
         frame_list = [self.idle_frames, self.attack_frames, self.digest_frames]
         name_list = [idle_name, attack_name, digest_name]
-        scale_list = [0.65, 0.65, 0.65]
+        scale_list = [0.85, 0.85, 0.85]
         rect_list = [(0, 0, 100, 114), None, None]
 
         for i, name in enumerate(name_list):
@@ -548,7 +570,7 @@ class PuffShroom(Plant):
 
 class PotatoMine(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.POTATOMINE, c.PLANT_HEALTH, None, 0.75)
+        Plant.__init__(self, x, y, c.POTATOMINE, c.PLANT_HEALTH, None, 1)
         self.animate_interval = 300
         self.is_init = True
         self.init_timer = 0
@@ -569,7 +591,7 @@ class PotatoMine(Plant):
         name_list = [init_name, idle_name, explode_name]
 
         for i, name in enumerate(name_list):
-            self.loadFrames(frame_list[i], name, 0.75)  # idle 用黑色（透明背景）
+            self.loadFrames(frame_list[i], name, 1)  # idle 用黑色（透明背景）
         self.frames = self.init_frames
 
     def idling(self):
@@ -595,7 +617,9 @@ class PotatoMine(Plant):
 
 class Squash(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.SQUASH, c.PLANT_HEALTH, None, 0.4)
+        Plant.__init__(self, x, y, c.SQUASH, c.PLANT_HEALTH, None, 0.5)
+        # 调整倭瓜位置，使其往下偏移较少
+        self.rect.bottom = y + c.scale(3)
         self.orig_pos = (x, y)
         self.aim_timer = 0
         self.squashing = False
@@ -613,7 +637,7 @@ class Squash(Plant):
         name_list = [idle_name, aim_name, attack_name]
 
         for i, name in enumerate(name_list):
-            self.loadFrames(frame_list[i], name, 0.4)
+            self.loadFrames(frame_list[i], name, 0.5)
 
 
         self.frames = self.idle_frames
@@ -650,12 +674,14 @@ class Squash(Plant):
 
 class Spikeweed(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.SPIKEWEED, c.PLANT_HEALTH, None, 0.75)
+        Plant.__init__(self, x, y, c.SPIKEWEED, c.PLANT_HEALTH, None, 1)
+        # 调整地刺位置，使其往下偏移
+        self.rect.bottom = y + c.scale(10)
         self.animate_interval = 200
         self.attack_timer = 0
 
     def loadImages(self, name, scale):
-        self.loadFrames(self.frames, name, 0.75)  # 使用默认黑色 colorkey
+        self.loadFrames(self.frames, name, 1)  # 使用默认黑色 colorkey
 
     def setIdle(self):
         print('spikeweed idle')
@@ -682,7 +708,9 @@ class Spikeweed(Plant):
 
 class Jalapeno(Plant):
     def __init__(self, x, y):
-        Plant.__init__(self, x, y, c.JALAPENO, c.PLANT_HEALTH, None, 0.75)
+        Plant.__init__(self, x, y, c.JALAPENO, c.PLANT_HEALTH, None, 1)
+        # 调整火爆辣椒位置，使其往下偏移
+        self.rect.bottom = y + c.scale(7)
         self.orig_pos = (x, y)
         self.state = c.ATTACK
         self.start_explode = False
@@ -692,9 +720,9 @@ class Jalapeno(Plant):
     def loadImages(self, name, scale):
         self.explode_frames = []
         explode_name = name + 'Explode'
-        self.loadFrames(self.explode_frames, explode_name, 0.75, c.WHITE)
+        self.loadFrames(self.explode_frames, explode_name, 1, c.WHITE)
 
-        self.loadFrames(self.frames, name, 0.75)  # idle 用默认黑色
+        self.loadFrames(self.frames, name, 1)  # idle 用默认黑色
 
     def setExplode(self):
         self.changeFrames(self.explode_frames)

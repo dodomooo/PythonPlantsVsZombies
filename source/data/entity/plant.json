@@ -1,5 +1,6 @@
 {
     "plant_image_rect":{
+        "Sun":{"x":0, "y":0, "width":80, "height":80},
         "PeaNormal":{"x":28, "y":0, "width":28, "height":34},
         "PeaIce":{"x":26, "y":0, "width":30, "height":34},
         "Chomper":{"x":0, "y":0, "width":110, "height":114},

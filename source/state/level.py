@@ -109,7 +109,19 @@ class Level(tool.State):
         img_index = self.map_data[c.BACKGROUND_TYPE]
         self.background_type = img_index
         bg = tool.GFX[c.BACKGROUND_NAME][img_index]
-        if c.ASSET_SCALE != 1:
+
+        # 检测是否为高清背景图
+        actual_w, actual_h = bg.get_width(), bg.get_height()
+        is_hd = (actual_w > c.HD_BACKGROUND_WIDTH_THRESHOLD or
+                 actual_h > c.HD_BACKGROUND_HEIGHT_THRESHOLD)
+
+        if is_hd:
+            # 高清图：缩放到与低清图相同的目标尺寸
+            target_width = int(c.BASE_BACKGROUND_REF_WIDTH * c.ASSET_SCALE)
+            target_height = int(c.BASE_BACKGROUND_REF_HEIGHT * c.ASSET_SCALE)
+            self.background = pg.transform.smoothscale(bg, (target_width, target_height))
+        elif c.ASSET_SCALE != 1:
+            # 低清图：按 ASSET_SCALE 缩放
             self.background = pg.transform.scale(
                 bg,
                 (int(bg.get_width() * c.ASSET_SCALE), int(bg.get_height() * c.ASSET_SCALE))
@@ -449,16 +461,28 @@ class Level(tool.State):
 
         # 为倭瓜和食人花设置缩放比例
         if plant_name == c.SQUASH:
-            scale = 0.4
+            scale = 0.5
         elif plant_name == c.CHOMPER:
-            scale = 0.65
-        elif plant_name == c.SNOWPEASHOOTER:
             scale = 0.85
+        elif plant_name == c.SNOWPEASHOOTER:
+            scale = 0.95
         elif plant_name == c.PEASHOOTER:
             scale = 0.95
         elif plant_name == c.REPEATERPEA:
-            scale = 1
+            scale = 1.1
         elif plant_name == c.WALLNUT:
+            scale = 1.1
+        elif plant_name == c.SUNFLOWER:
+            scale = 0.88
+        elif plant_name == c.THREEPEASHOOTER:
+            scale = 0.85
+        elif plant_name == c.CHERRYBOMB:
+            scale = 0.85
+        elif plant_name == c.POTATOMINE:
+            scale = 1
+        elif plant_name == c.SPIKEWEED:
+            scale = 1
+        elif plant_name == c.JALAPENO:
             scale = 1
         else:
             scale = 0.75

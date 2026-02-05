@@ -125,11 +125,19 @@ def get_image(sheet, x, y, width, height, colorkey=c.BLACK, scale=1):
         src_y = int(y * c.ASSET_PIXEL_RATIO)
         src_w = int(width * c.ASSET_PIXEL_RATIO)
         src_h = int(height * c.ASSET_PIXEL_RATIO)
-        image = pg.Surface([src_w, src_h])
+
+        # 如果 colorkey 为 None，使用 SRCALPHA 支持完整透明度
+        if colorkey is None:
+            image = pg.Surface([src_w, src_h], pg.SRCALPHA)
+        else:
+            image = pg.Surface([src_w, src_h])
+
         rect = image.get_rect()
 
         image.blit(sheet, (0, 0), (src_x, src_y, src_w, src_h))
-        image.set_colorkey(colorkey)
+        if colorkey is not None:
+            image.set_colorkey(colorkey)
+
         total_scale = scale * c.ASSET_SCALE
         if total_scale != 1:
             image = pg.transform.scale(image,
@@ -144,7 +152,7 @@ def get_image_fit(sheet, x, y, width, height, colorkey=c.BLACK, target_width=Non
         sheet: 源图像 Surface
         x, y: 源图像裁剪起始坐标
         width, height: 源图像裁剪尺寸
-        colorkey: 透明色
+        colorkey: 透明色（None 时使用 SRCALPHA）
         target_width: 目标宽度
         target_height: 目标高度
         keep_ratio: 是否保持宽高比（默认 True）
@@ -156,9 +164,16 @@ def get_image_fit(sheet, x, y, width, height, colorkey=c.BLACK, target_width=Non
     src_y = int(y * c.ASSET_PIXEL_RATIO)
     src_w = int(width * c.ASSET_PIXEL_RATIO)
     src_h = int(height * c.ASSET_PIXEL_RATIO)
-    image = pg.Surface([src_w, src_h])
+
+    # 如果 colorkey 为 None，使用 SRCALPHA 支持完整透明度
+    if colorkey is None:
+        image = pg.Surface([src_w, src_h], pg.SRCALPHA)
+    else:
+        image = pg.Surface([src_w, src_h])
+
     image.blit(sheet, (0, 0), (src_x, src_y, src_w, src_h))
-    image.set_colorkey(colorkey)
+    if colorkey is not None:
+        image.set_colorkey(colorkey)
 
     if target_width is None and target_height is None:
         return image
