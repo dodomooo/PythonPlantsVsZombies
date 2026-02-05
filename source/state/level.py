@@ -162,7 +162,7 @@ class Level(tool.State):
         self.cars = []
         for i in range(self.map_y_len):
             _, y = self.map.getMapGridPos(0, i)
-            self.cars.append(plant.Car(-c.scale(25), y + c.scale(20), i))
+            self.cars.append(plant.Car(-c.scale(25), y - c.scale(20), i))
 
     def update(self, surface, current_time, mouse_pos, mouse_click, events, mouse_hover_pos=None):
         self.current_time = self.game_info[c.CURRENT_TIME] = current_time
