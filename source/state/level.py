@@ -99,6 +99,18 @@ class Level(tool.State):
         t4 = time.time()
         print(f'[DEBUG] Level.startup: map={t1-t0:.3f}s, loadMap={t2-t1:.3f}s, setupBg={t3-t2:.3f}s, initState={t4-t3:.3f}s')
 
+    def collide_with_hitbox(self, sprite1, sprite2):
+        '''使用僵尸的 hitbox 进行碰撞检测'''
+        # 如果僵尸正在死亡动画中，返回 False 让子弹继续检测后面的僵尸
+        if hasattr(sprite2, 'state') and sprite2.state == c.DIE:
+            return False
+
+        # sprite1 通常是子弹，sprite2 是僵尸
+        # 如果 sprite2 有 hitbox 属性，使用 hitbox；否则使用 rect
+        if hasattr(sprite2, 'hitbox'):
+            return sprite1.rect.colliderect(sprite2.hitbox)
+        return sprite1.rect.colliderect(sprite2.rect)
+
     def loadMap(self):
         map_file = 'level_' + str(self.game_info[c.LEVEL_NUM]) + '.json'
         file_path = resource_path('source', 'data', 'map', map_file)
@@ -522,14 +534,13 @@ class Level(tool.State):
         self.hint_plant = False
 
     def checkBulletCollisions(self):
-        collided_func = self._collide_ratio[0.7]
         for i in range(self.map_y_len):
             if len(self.zombie_groups[i]) == 0:
                 continue
             for bullet in self.bullet_groups[i]:
                 if bullet.state == c.FLY:
-                    zombie = pg.sprite.spritecollideany(bullet, self.zombie_groups[i], collided_func)
-                    if zombie and zombie.state != c.DIE:
+                    zombie = pg.sprite.spritecollideany(bullet, self.zombie_groups[i], self.collide_with_hitbox)
+                    if zombie:  # collide_with_hitbox 已经过滤了死亡僵尸
                         zombie.setDamage(bullet.damage, bullet.ice)
                         bullet.setExplode()
     

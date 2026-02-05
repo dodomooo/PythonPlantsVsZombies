@@ -43,6 +43,13 @@ class Zombie(pg.sprite.Sprite):
         self._flip_cache = {}
         self._last_alpha = None
         self._last_image = None
+
+        # 碰撞矩形：缩小碰撞区域，避免击中图片前面的空白
+        # 必须在 is_hypno 初始化之后设置
+        self.hitbox = self.rect.copy()
+        self.hitbox_offset_x = c.scale(55)  # 向右偏移，跳过前面的空白
+        self.hitbox_width_ratio = 0.6  # 碰撞区域宽度为原始宽度的 60%
+        self.updateHitbox()
     
     def loadFrames(self, frames, name, image_x, colorkey=c.BLACK, scale=1):
         frame_list = tool.GFX[name]
@@ -80,6 +87,7 @@ class Zombie(pg.sprite.Sprite):
         self.handleState()
         self.updateIceSlow()
         self.animation()
+        self.updateHitbox()
 
     def handleState(self):
         if self.state == c.WALK:
@@ -201,6 +209,17 @@ class Zombie(pg.sprite.Sprite):
         if self.ice_slow_ratio > 1:
             if (self.current_time - self.ice_slow_timer) > c.ICE_SLOW_TIME:
                 self.ice_slow_ratio = 1
+
+    def updateHitbox(self):
+        '''更新碰撞矩形位置，使其跟随僵尸移动'''
+        if self.is_hypno:
+            # 被催眠的僵尸向右移动，hitbox 在左侧
+            self.hitbox.right = self.rect.right - self.hitbox_offset_x
+        else:
+            # 正常僵尸向左移动，hitbox 在右侧（跳过前面的空白）
+            self.hitbox.left = self.rect.left + self.hitbox_offset_x
+        self.hitbox.width = int(self.rect.width * self.hitbox_width_ratio)
+        self.hitbox.centery = self.rect.centery
 
     def setDamage(self, damage, ice=False):
         self.health -= damage
